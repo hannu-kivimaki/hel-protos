@@ -1,0 +1,562 @@
+/* SideNavigation - World-class implementation */
+/* Refined Nordic Minimalism: clean, confident, trustworthy */
+/* Features: sliding indicator, spring animations, staggered reveals */
+
+.sidenav {
+  --sidenav-row-height: 52px;
+  --sidenav-indent: 0px;
+  --sidenav-indicator-width: 4px;
+  --sidenav-transition-fast: 150ms;
+  --sidenav-transition-normal: 250ms;
+  --sidenav-spring: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --sidenav-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: relative;
+  background: var(--color-white);
+  width: 100%;
+}
+
+/* ============================================
+   SLIDING ACTIVE INDICATOR
+   ============================================ */
+
+.sidenav-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--sidenav-indicator-width);
+  background: var(--color-black-90);
+  /* Sharp edges - no border-radius */
+  transition:
+    transform var(--sidenav-transition-normal) var(--sidenav-spring),
+    height var(--sidenav-transition-normal) var(--sidenav-spring),
+    opacity var(--sidenav-transition-fast) ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.sidenav-indicator--no-transition {
+  transition: none;
+}
+
+/* ============================================
+   MOBILE BACKDROP
+   ============================================ */
+
+.sidenav-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidenav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--sidenav-transition-normal) ease,
+      visibility var(--sidenav-transition-normal) ease;
+    z-index: 99;
+  }
+
+  .sidenav-backdrop--visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* ============================================
+   MOBILE TOGGLE
+   ============================================ */
+
+.sidenav-mobile-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  width: 100%;
+  padding: var(--spacing-s) var(--spacing-m);
+  background: var(--color-white);
+  border: 1px solid var(--color-black-20);
+  font-family: var(--font-default);
+  font-size: var(--fontsize-body-m);
+  font-weight: var(--fontweight-medium);
+  color: var(--color-black-90);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--sidenav-transition-fast) ease;
+}
+
+.sidenav-mobile-toggle:hover {
+  background: var(--color-black-5);
+}
+
+.sidenav-mobile-toggle:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: -3px;
+}
+
+.sidenav-mobile-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidenav-mobile-toggle-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================
+   NAVIGATION CONTENT
+   ============================================ */
+
+.sidenav-content {
+  display: none;
+}
+
+.sidenav--open .sidenav-content {
+  display: block;
+  border: 1px solid var(--color-black-20);
+  border-top: none;
+}
+
+/* ============================================
+   HEADER - Clean and minimal
+   ============================================ */
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m);
+}
+
+.sidenav-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--color-black-90);
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background-color var(--sidenav-transition-fast) ease;
+}
+
+.sidenav-back:hover {
+  background: var(--color-black-5);
+}
+
+.sidenav-back:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+.sidenav-section-title {
+  font-family: var(--font-default);
+  font-size: var(--fontsize-heading-xs);
+  font-weight: var(--fontweight-bold);
+  color: var(--color-black-90);
+  line-height: 1.2;
+}
+
+/* ============================================
+   ROOT SECTION LINK - Prominent but clean
+   ============================================ */
+
+.sidenav-root {
+  display: block;
+  padding: var(--spacing-s) var(--spacing-m);
+  font-family: var(--font-default);
+  font-size: var(--fontsize-body-l);
+  font-weight: var(--fontweight-bold);
+  color: var(--color-black-90);
+  text-decoration: none;
+  transition: background-color var(--sidenav-transition-fast) ease;
+}
+
+.sidenav-root:hover {
+  background: var(--color-black-5);
+}
+
+.sidenav-root:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: -3px;
+}
+
+/* ============================================
+   NAVIGATION LIST - Clean hierarchy
+   ============================================ */
+
+.sidenav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidenav-list--level-0 {
+  position: relative;
+}
+
+/* Spine connecting root-level items */
+.sidenav-list--level-0::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-black-20);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sidenav-list--level-1,
+.sidenav-list--level-2 {
+  margin-left: 0;
+}
+
+/* ============================================
+   SUBMENU ANIMATION - Spring physics
+   ============================================ */
+
+.sidenav-submenu {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--sidenav-transition-normal) var(--sidenav-spring);
+}
+
+.sidenav-submenu--open {
+  grid-template-rows: 1fr;
+}
+
+.sidenav-submenu > .sidenav-list {
+  overflow: hidden;
+}
+
+/* Staggered reveal animation */
+@keyframes itemReveal {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sidenav-submenu--open > .sidenav-list > .sidenav-item {
+  animation: itemReveal var(--sidenav-transition-normal) var(--sidenav-ease) backwards;
+  animation-delay: calc(var(--item-index, 0) * 40ms);
+}
+
+/* ============================================
+   VERTICAL SPINE - Connects sibling items
+   ============================================ */
+
+.sidenav-submenu--open > .sidenav-list {
+  position: relative;
+}
+
+.sidenav-submenu--open > .sidenav-list::before {
+  content: '';
+  position: absolute;
+  /* Position at child indent level: parent indent + 16px for next level */
+  left: calc(var(--sidenav-parent-indent, 0px) + 16px);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-black-20);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================
+   NAVIGATION ITEM
+   ============================================ */
+
+.sidenav-item {
+  position: relative;
+}
+
+.sidenav-row {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  min-height: var(--sidenav-row-height);
+}
+
+/* ============================================
+   NAVIGATION LINK
+   ============================================ */
+
+.sidenav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-height: var(--sidenav-row-height);
+  padding: var(--spacing-xs) var(--spacing-m);
+  padding-left: calc(var(--sidenav-indent, 0px) + 16px);
+  font-family: var(--font-default);
+  font-size: 18px;
+  font-weight: var(--fontweight-regular);
+  color: var(--color-black-90);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--sidenav-transition-fast) ease;
+}
+
+/* Simplified hover - underline on label only */
+.sidenav-link:hover {
+  color: var(--color-black-90);
+}
+
+.sidenav-link:hover .sidenav-label {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 2px;
+}
+
+/* Focus on label only, not entire row */
+.sidenav-link:focus,
+.sidenav-link:focus-visible {
+  outline: none;
+}
+
+.sidenav-link:focus .sidenav-label,
+.sidenav-link:focus-visible .sidenav-label {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+.sidenav-label {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Parent items styling */
+.sidenav-link--parent {
+  font-weight: var(--fontweight-medium);
+}
+
+/* ============================================
+   EXPAND/COLLAPSE TOGGLE BUTTON
+   ============================================ */
+
+.sidenav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-black-90);
+  cursor: pointer;
+}
+
+.sidenav-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--color-black-5);
+  transition: background-color var(--sidenav-transition-fast) ease;
+}
+
+.sidenav-toggle svg {
+  width: 28px;
+  height: 28px;
+  transform-origin: center center;
+  transition: transform var(--sidenav-transition-normal) var(--sidenav-spring);
+}
+
+.sidenav-toggle:hover .sidenav-toggle-icon {
+  background: var(--color-black-10);
+}
+
+.sidenav-toggle:focus,
+.sidenav-toggle:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: -3px;
+  z-index: 1;
+}
+
+.sidenav-toggle--expanded svg {
+  transform: rotate(180deg);
+}
+
+/* ============================================
+   ACTIVE & ANCESTOR STATES
+   ============================================ */
+
+/* Active item - handled by sliding indicator, just add background */
+.sidenav-item--active > .sidenav-row .sidenav-link {
+  background: linear-gradient(
+    90deg,
+    transparent var(--sidenav-indent, 0px),
+    var(--color-black-5) var(--sidenav-indent, 0px)
+  );
+  font-weight: 700;
+}
+
+.sidenav-item--active > .sidenav-row .sidenav-link:hover {
+  background: linear-gradient(
+    90deg,
+    transparent var(--sidenav-indent, 0px),
+    var(--color-black-5) var(--sidenav-indent, 0px)
+  );
+}
+
+.sidenav-item--active > .sidenav-row .sidenav-toggle-icon {
+  background: var(--color-black-5);
+}
+
+.sidenav-item--active > .sidenav-row .sidenav-toggle:hover .sidenav-toggle-icon {
+  background: var(--color-black-10);
+}
+
+/* Ancestor - indicator line shows path to active item */
+.sidenav-item--ancestor > .sidenav-row {
+  position: relative;
+}
+
+.sidenav-item--ancestor > .sidenav-row::before {
+  content: '';
+  position: absolute;
+  left: var(--sidenav-indent, 0px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--sidenav-indicator-width);
+  height: calc(var(--sidenav-row-height) / 4);
+  background: var(--color-black-20);
+  /* Sharp edges - no border-radius */
+}
+
+.sidenav-item--ancestor > .sidenav-row .sidenav-link {
+  font-weight: 500;
+}
+
+.sidenav-item--ancestor > .sidenav-row .sidenav-toggle {
+  color: var(--color-black-90);
+}
+
+/* ============================================
+   TYPOGRAPHY HIERARCHY
+   ============================================ */
+
+/* Level-based padding is driven by --sidenav-indent */
+
+/* All levels use consistent 18px and black-90 */
+.sidenav-list--level-2 .sidenav-link,
+.sidenav-list--level-3 .sidenav-link {
+  font-size: 18px;
+  color: var(--color-black-90);
+}
+
+/* ============================================
+   DESKTOP STYLES
+   ============================================ */
+
+@media (min-width: 769px) {
+  .sidenav-mobile-toggle {
+    display: none;
+  }
+
+  .sidenav-content {
+    display: block;
+    border: none;
+  }
+
+  .sidenav--open .sidenav-content {
+    border: none;
+  }
+
+  .sidenav-header {
+    padding: var(--spacing-s) 0;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .sidenav-root {
+    padding: var(--spacing-s) 0;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .sidenav-link {
+    padding: var(--spacing-xs) var(--spacing-s);
+    padding-left: calc(var(--sidenav-indent, 0px) + 16px);
+  }
+}
+
+/* ============================================
+   FOCUS MANAGEMENT
+   ============================================ */
+
+.sidenav button:focus,
+.sidenav button:focus-visible {
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .sidenav-indicator,
+  .sidenav-toggle,
+  .sidenav-toggle svg,
+  .sidenav-link,
+  .sidenav-submenu,
+  .sidenav-backdrop {
+    transition: none;
+  }
+
+  .sidenav-submenu--open > .sidenav-list > .sidenav-item {
+    animation: none;
+  }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  .sidenav-mobile-toggle,
+  .sidenav-backdrop,
+  .sidenav-indicator,
+  .sidenav-toggle,
+  .sidenav-submenu--open > .sidenav-list::before {
+    display: none;
+  }
+
+  .sidenav-content {
+    display: block;
+  }
+
+  .sidenav-submenu {
+    display: block;
+    grid-template-rows: unset;
+  }
+
+  .sidenav-submenu > .sidenav-list {
+    overflow: visible;
+  }
+}

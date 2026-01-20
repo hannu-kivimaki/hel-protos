@@ -1,0 +1,4 @@
+experimental_use_rmcp_client = true
+
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
