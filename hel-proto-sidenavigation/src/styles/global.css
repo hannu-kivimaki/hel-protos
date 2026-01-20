@@ -192,6 +192,23 @@ p {
   padding-right: 24px !important;
 }
 
+.centered-container nav[class*="Breadcrumb"],
+.centered-container nav[class*="Breadcrumb"] * {
+  font-size: 14px !important;
+}
+
+.centered-container nav[class*="Breadcrumb"] a {
+  color: var(--color-black-90) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 0.1em !important;
+  text-decoration-thickness: 1px !important;
+}
+
+.centered-container nav[class*="Breadcrumb"] a:hover {
+  color: var(--color-black-90) !important;
+  text-decoration-thickness: 2px !important;
+}
+
 .content-layout {
   display: flex;
   flex: 1;
