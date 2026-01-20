@@ -440,7 +440,9 @@ function App() {
       </Header>
 
       {/* ✅ HDS Core: Breadcrumb - Suoraan Drupalissa */}
-      <Breadcrumb ariaLabel="Murupolku" list={breadcrumbItems} />
+      <div className="centered-container">
+        <Breadcrumb ariaLabel="Murupolku" list={breadcrumbItems} />
+      </div>
 
       <div className="content-layout">
         {/* ⚠️ Custom SideNavigation - VAATII Drupal-sovituksen */}

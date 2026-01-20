@@ -56,3 +56,15 @@ Updated SideNavigation toggle button to match hel.fi production:
 
 **Cleanup:**
 - Removed unused `TreeNavigation` component (`TreeNavigation.tsx`, `TreeNavigation.css`)
+
+### 2026-01-20: Layout Centering Fix
+
+Fixed horizontal alignment to match HDS Header:
+
+**Changes:**
+- Added `max-width: 1440px` centering to content area
+- Wrapped Breadcrumb in `.centered-container`
+- Applied same centering to `.content-layout` (SideNavigation + main content)
+- Updated responsive breakpoint padding
+
+**Live demo:** https://hannu-kivimaki.github.io/hel-protos/
