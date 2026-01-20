@@ -176,37 +176,43 @@ p {
   flex-direction: column;
 }
 
-/* Centered container matching HDS Header max-width */
+/* Centered container matching HDS Header max-width (24px = Header padding) */
 .centered-container {
   max-width: 1440px;
   margin: 0 auto;
   width: 100%;
-  padding: 0 var(--spacing-l);
+  padding: 0;
+}
+
+/* Override HDS Breadcrumb to match Header 24px padding */
+.centered-container nav[class*="Breadcrumb"] {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
 }
 
 .content-layout {
   display: flex;
   flex: 1;
-  max-width: 1440px;
+  max-width: calc(404px + 860px + 64px);
   margin: 0 auto;
   width: 100%;
-  padding: 0 var(--spacing-l);
+  padding: 0;
 }
 
 .side-navigation-container {
-  width: 340px;
+  width: 404px;
   flex-shrink: 0;
   background-color: var(--color-white);
   border-right: none;
-  padding: var(--spacing-l) 0;
-  padding-right: var(--spacing-l);
+  padding: var(--spacing-l) 32px;
 }
 
 .main-content {
   flex: 1;
-  padding: var(--spacing-xl) 0;
-  padding-left: var(--spacing-l);
-  max-width: 900px;
+  padding: var(--spacing-xl) 32px;
+  max-width: 860px;
 }
 
 /* Test tasks block */
