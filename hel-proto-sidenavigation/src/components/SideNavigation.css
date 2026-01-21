@@ -3,7 +3,7 @@
 /* Features: sliding indicator, spring animations, staggered reveals */
 
 .sidenav {
-  --sidenav-row-height: 52px;
+  --sidenav-row-height: 56px;
   --sidenav-indent: 0px;
   --sidenav-indicator-width: 4px;
   --sidenav-transition-fast: 150ms;
@@ -133,8 +133,8 @@
 .sidenav-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-s);
   padding: var(--spacing-m);
+  border-bottom: 2px solid var(--color-black-90);
 }
 
 .sidenav-back {
@@ -143,14 +143,20 @@
   justify-content: center;
   width: 32px;
   height: 32px;
+  margin-left: 8px;
+  margin-right: 16px;
   color: var(--color-black-90);
   text-decoration: none;
   border-radius: 2px;
-  transition: background-color var(--sidenav-transition-fast) ease;
+  transition: transform var(--sidenav-transition-fast) var(--sidenav-ease);
 }
 
 .sidenav-back:hover {
-  background: var(--color-black-5);
+  transform: translateX(-4px);
+}
+
+.sidenav-header:hover .sidenav-back {
+  transform: translateX(-4px);
 }
 
 .sidenav-back:focus-visible {
@@ -160,10 +166,23 @@
 
 .sidenav-section-title {
   font-family: var(--font-default);
-  font-size: var(--fontsize-heading-xs);
-  font-weight: var(--fontweight-bold);
+  font-size: 24px;
+  font-weight: var(--fontweight-medium);
   color: var(--color-black-90);
   line-height: 1.2;
+  text-decoration: none;
+}
+
+.sidenav-section-title:hover {
+  color: var(--color-black-90);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 2px;
+}
+
+.sidenav-section-title:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
 }
 
 /* ============================================
@@ -328,13 +347,20 @@
   text-decoration-thickness: 2px;
 }
 
-/* Focus on label only, not entire row */
-.sidenav-link:focus,
-.sidenav-link:focus-visible {
+/* Hide focus ring on mouse click */
+.sidenav-link:focus {
   outline: none;
 }
 
-.sidenav-link:focus .sidenav-label,
+/* Show outline only while mouse is pressed */
+.sidenav-link:active .sidenav-label {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Keyboard navigation focus - always show */
 .sidenav-link:focus-visible .sidenav-label {
   outline: 3px solid var(--color-black-90);
   outline-offset: 2px;
@@ -360,10 +386,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
   flex-shrink: 0;
   width: 44px;
   height: 44px;
-  min-height: 44px;
   padding: 0;
   background: transparent;
   border: none;
@@ -407,26 +433,21 @@
    ACTIVE & ANCESTOR STATES
    ============================================ */
 
-/* Active item - handled by sliding indicator, just add background */
-.sidenav-item--active > .sidenav-row .sidenav-link {
+/* Active item - handled by sliding indicator, background spans full row */
+.sidenav-item--active > .sidenav-row {
   background: linear-gradient(
     90deg,
     transparent var(--sidenav-indent, 0px),
     var(--color-black-5) var(--sidenav-indent, 0px)
   );
+}
+
+.sidenav-item--active > .sidenav-row .sidenav-link {
   font-weight: 700;
 }
 
-.sidenav-item--active > .sidenav-row .sidenav-link:hover {
-  background: linear-gradient(
-    90deg,
-    transparent var(--sidenav-indent, 0px),
-    var(--color-black-5) var(--sidenav-indent, 0px)
-  );
-}
-
 .sidenav-item--active > .sidenav-row .sidenav-toggle-icon {
-  background: var(--color-black-5);
+  background: var(--color-white);
 }
 
 .sidenav-item--active > .sidenav-row .sidenav-toggle:hover .sidenav-toggle-icon {

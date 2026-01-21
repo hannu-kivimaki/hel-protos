@@ -274,7 +274,7 @@ export function SideNavigation({
             <a href={backHref} className="sidenav-back" aria-label={`${backLabel}: ${sectionTitle}`}>
               <IconArrowLeft size="s" aria-hidden="true" />
             </a>
-            <span className="sidenav-section-title">{sectionTitle}</span>
+            <a href={backHref} className="sidenav-section-title">{sectionTitle}</a>
           </div>
 
           {/* Navigation tree */}
