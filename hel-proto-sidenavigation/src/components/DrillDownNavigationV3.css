@@ -1,0 +1,650 @@
+/* DrillDownNavigation V3 - Premium Mobile Navigation */
+/* Phase 1: Staggered reveals, scroll restoration, focus management, announcements, URL sync */
+/* Design: Instant panel swap with cascading item reveals - no horizontal slide */
+
+.drilldown-v3 {
+  --drilldown-row-height: 56px;
+  --drilldown-duration: 220ms;
+  --drilldown-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --drilldown-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --drilldown-transition-fast: 150ms;
+  --drilldown-stagger-delay: 40ms;
+
+  position: relative;
+  background: var(--color-white);
+  width: 100%;
+  touch-action: pan-y pinch-zoom;
+}
+
+/* ============================================
+   SWIPE GESTURE FEEDBACK
+   ============================================ */
+
+.drilldown-v3--swiping .drilldown-v3-viewport {
+  transform: translateX(var(--swipe-offset, 0));
+  opacity: calc(1 - var(--swipe-offset, 0) / 300);
+}
+
+.drilldown-v3--swiping::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--color-black-90);
+  opacity: calc(var(--swipe-offset, 0) / 80);
+  transform: scaleX(calc(var(--swipe-offset, 0) / 40));
+  transform-origin: left;
+}
+
+/* ============================================
+   EDGE-SWIPE AFFORDANCE
+   ============================================ */
+
+/* Subtle left edge hint when swipe is available */
+.drilldown-v3--can-swipe .drilldown-v3-viewport::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 48px;
+  background: var(--color-black-20);
+  border-radius: 0 2px 2px 0;
+  opacity: 0;
+  animation: edgeHint 2s ease-in-out 1s 1;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes edgeHint {
+  0%, 100% { opacity: 0; transform: translateY(-50%) translateX(-3px); }
+  20%, 80% { opacity: 0.6; transform: translateY(-50%) translateX(0); }
+}
+
+/* ============================================
+   LIVE REGION (Screen Reader Announcements)
+   ============================================ */
+
+.drilldown-v3-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================
+   KEYFRAME ANIMATIONS
+   ============================================ */
+
+/* Drill IN: Items cascade down from above */
+@keyframes cascadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Drill OUT (back): Items cascade up from below */
+@keyframes cascadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle scale for the whole list appearing */
+@keyframes listAppear {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.drilldown-v3-header {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-s) 0;
+  border-bottom: 2px solid var(--color-black-90);
+  position: relative;
+}
+
+.drilldown-v3-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-left: 8px;
+  margin-right: 8px;
+  color: var(--color-black-90);
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 250ms var(--drilldown-spring);
+}
+
+.drilldown-v3-back:hover:not(:disabled) {
+  transform: translateX(-5px);
+}
+
+.drilldown-v3-header:hover .drilldown-v3-back:not(:disabled) {
+  transform: translateX(-5px);
+}
+
+.drilldown-v3-back:active:not(:disabled) {
+  transform: translateX(-7px) scale(0.95);
+  transition: transform 100ms ease;
+}
+
+.drilldown-v3-back:disabled {
+  cursor: default;
+}
+
+.drilldown-v3-back:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+.drilldown-v3-header-title-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 24px;
+}
+
+.drilldown-v3-section-title {
+  font-family: var(--font-default);
+  font-size: 18px;
+  font-weight: var(--fontweight-medium);
+  color: var(--color-black-90);
+  line-height: 1.2;
+  text-decoration: none;
+  display: block;
+}
+
+/* Hover on header affects both arrow and title */
+.drilldown-v3-header:hover .drilldown-v3-section-title {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 2px;
+}
+
+a.drilldown-v3-section-title:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+/* Header crossfade animations */
+@keyframes headerSlideInFromRight {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes headerSlideInFromLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes headerSlideOutToLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-12px); }
+}
+
+@keyframes headerSlideOutToRight {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(12px); }
+}
+
+/* Enter animations (new title coming in) */
+.drilldown-v3-section-title--enter-in {
+  animation: headerSlideInFromRight 180ms var(--drilldown-ease) both;
+}
+
+.drilldown-v3-section-title--enter-out {
+  animation: headerSlideInFromLeft 180ms var(--drilldown-ease) both;
+}
+
+/* Exit animations (old title going out) */
+.drilldown-v3-section-title--exit-in,
+.drilldown-v3-section-title--exit-out {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.drilldown-v3-section-title--exit-in {
+  animation: headerSlideOutToLeft 180ms var(--drilldown-ease) both;
+}
+
+.drilldown-v3-section-title--exit-out {
+  animation: headerSlideOutToRight 180ms var(--drilldown-ease) both;
+}
+
+
+/* ============================================
+   CURRENT PAGE INDICATOR
+   ============================================ */
+
+.drilldown-v3-current-page {
+  padding: var(--spacing-m) var(--spacing-s);
+  padding-left: 16px;
+}
+
+.drilldown-v3-current-label {
+  font-family: var(--font-default);
+  font-size: 24px;
+  font-weight: var(--fontweight-bold);
+  color: var(--color-black-90);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 2px;
+}
+
+a.drilldown-v3-current-label {
+  cursor: pointer;
+}
+
+a.drilldown-v3-current-label:hover {
+  color: var(--color-black-90);
+}
+
+a.drilldown-v3-current-label:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   VIEWPORT & PANELS
+   ============================================ */
+
+.drilldown-v3-viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.drilldown-v3-panel {
+  background: var(--color-white);
+}
+
+.drilldown-v3-panel--current {
+  position: relative;
+  z-index: 2;
+}
+
+/* No horizontal slide - just instant swap with list fade */
+.drilldown-v3-panel--enter-from-right,
+.drilldown-v3-panel--enter-from-left {
+  animation: listAppear 150ms ease both;
+}
+
+/* Hide exiting panels instantly */
+.drilldown-v3-panel--exit-left,
+.drilldown-v3-panel--exit-right {
+  display: none;
+}
+
+/* ============================================
+   STAGGERED ITEM REVEALS - THE STAR OF THE SHOW
+   ============================================ */
+
+/* Drilling IN: Items cascade DOWN (feeling of descending into hierarchy) */
+.drilldown-v3-panel--enter-from-right .drilldown-v3-item--entering {
+  animation: cascadeDown 200ms var(--drilldown-ease) backwards;
+  animation-delay: calc(var(--item-index, 0) * var(--drilldown-stagger-delay));
+}
+
+/* Drilling OUT (back): Items cascade UP (feeling of ascending back) */
+.drilldown-v3-panel--enter-from-left .drilldown-v3-item--entering {
+  animation: cascadeUp 200ms var(--drilldown-ease) backwards;
+  animation-delay: calc(var(--item-index, 0) * var(--drilldown-stagger-delay));
+}
+
+/* ============================================
+   LIST
+   ============================================ */
+
+.drilldown-v3-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+   ITEM ROW
+   ============================================ */
+
+.drilldown-v3-item {
+  border-bottom: 1px solid var(--color-black-20);
+}
+
+.drilldown-v3-item:first-child {
+  border-top: 1px solid var(--color-black-20);
+}
+
+.drilldown-v3-row {
+  display: flex;
+  align-items: stretch;
+  min-height: var(--drilldown-row-height);
+  position: relative;
+}
+
+/* Active item indicator bar */
+.drilldown-v3-row--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--color-black-90);
+  animation: indicatorSlideIn 200ms var(--drilldown-spring) both;
+}
+
+@keyframes indicatorSlideIn {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+
+/* ============================================
+   LINK
+   ============================================ */
+
+.drilldown-v3-link {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-height: var(--drilldown-row-height);
+  padding: var(--spacing-xs) var(--spacing-s);
+  padding-left: 16px;
+  font-family: var(--font-default);
+  font-size: 18px;
+  font-weight: var(--fontweight-regular);
+  color: var(--color-black-90);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color var(--drilldown-transition-fast) ease,
+    transform var(--drilldown-transition-fast) ease;
+}
+
+.drilldown-v3-link:hover {
+  color: var(--color-black-90);
+}
+
+.drilldown-v3-link:hover .drilldown-v3-label {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 2px;
+}
+
+/* Press/active state - spring scale */
+.drilldown-v3-link:active {
+  transform: scale(0.97);
+  transition: transform 80ms ease-out;
+}
+
+/* Hide focus ring on mouse click */
+.drilldown-v3-link:focus {
+  outline: none;
+}
+
+/* Keyboard navigation focus */
+.drilldown-v3-link:focus-visible .drilldown-v3-label {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+.drilldown-v3-row--active .drilldown-v3-link {
+  font-weight: 700;
+}
+
+.drilldown-v3-label {
+  flex: 1;
+}
+
+/* ============================================
+   CHEVRON BUTTON
+   ============================================ */
+
+.drilldown-v3-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-black-90);
+  cursor: pointer;
+}
+
+.drilldown-v3-chevron-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  transition: transform 250ms var(--drilldown-spring);
+}
+
+/* Chevron nudge on row hover */
+.drilldown-v3-row:hover .drilldown-v3-chevron-icon {
+  transform: translateX(4px);
+}
+
+.drilldown-v3-chevron:hover .drilldown-v3-chevron-icon {
+  transform: translateX(6px);
+}
+
+/* Press state - spring back */
+.drilldown-v3-chevron:active .drilldown-v3-chevron-icon {
+  transform: translateX(8px) scale(0.92);
+  transition: transform 80ms ease-out;
+}
+
+.drilldown-v3-chevron:focus,
+.drilldown-v3-chevron:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: -3px;
+  z-index: 1;
+}
+
+.drilldown-v3-chevron svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* ============================================
+   RECENTLY VISITED
+   ============================================ */
+
+.drilldown-v3-recent {
+  margin-top: var(--spacing-l);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-black-20);
+}
+
+.drilldown-v3-recent-header {
+  font-family: var(--font-default);
+  font-size: 14px;
+  font-weight: var(--fontweight-medium);
+  color: var(--color-black-60);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0 16px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.drilldown-v3-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.drilldown-v3-recent-item {
+  animation: recentReveal 200ms var(--drilldown-ease) backwards;
+  animation-delay: calc(var(--recent-index, 0) * 50ms);
+}
+
+@keyframes recentReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.drilldown-v3-recent-link {
+  display: block;
+  padding: var(--spacing-xs) 16px;
+  font-family: var(--font-default);
+  font-size: 16px;
+  color: var(--color-black-90);
+  text-decoration: none;
+  transition: transform 200ms var(--drilldown-spring);
+}
+
+.drilldown-v3-recent-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 2px;
+}
+
+.drilldown-v3-recent-link:active {
+  transform: scale(0.98);
+  transition: transform 80ms ease-out;
+}
+
+.drilldown-v3-recent-link:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   FOCUS MANAGEMENT
+   ============================================ */
+
+.drilldown-v3 button:focus,
+.drilldown-v3 button:focus-visible {
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .drilldown-v3-panel--enter-from-right,
+  .drilldown-v3-panel--enter-from-left {
+    animation: none;
+  }
+
+  .drilldown-v3-panel--enter-from-right .drilldown-v3-item--entering,
+  .drilldown-v3-panel--enter-from-left .drilldown-v3-item--entering {
+    animation: none;
+  }
+
+  .drilldown-v3-row--active::before {
+    animation: none;
+  }
+
+  .drilldown-v3-section-title--enter-in,
+  .drilldown-v3-section-title--enter-out,
+  .drilldown-v3-section-title--exit-in,
+  .drilldown-v3-section-title--exit-out {
+    animation: none;
+  }
+
+  .drilldown-v3-back,
+  .drilldown-v3-link,
+  .drilldown-v3-chevron-icon,
+  .drilldown-v3-recent-link {
+    transition: none;
+  }
+
+  .drilldown-v3-recent-item {
+    animation: none;
+  }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE
+   ============================================ */
+
+@media (forced-colors: active) {
+  .drilldown-v3-row--active::before {
+    background: CanvasText;
+  }
+
+  .drilldown-v3-item {
+    border-color: CanvasText;
+  }
+
+  .drilldown-v3-header {
+    border-color: CanvasText;
+  }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  .drilldown-v3-depth-indicator,
+  .drilldown-v3-chevron {
+    display: none;
+  }
+
+  .drilldown-v3-panel--exit-left,
+  .drilldown-v3-panel--exit-right {
+    display: none;
+  }
+
+  .drilldown-v3-row--active::before {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
