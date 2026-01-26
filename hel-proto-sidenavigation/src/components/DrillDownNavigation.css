@@ -1,0 +1,353 @@
+/* DrillDownNavigation - Mobile menu style drill-down */
+/* Styles aligned with SideNavigation for consistent UX */
+
+.drilldown {
+  --drilldown-row-height: 56px;
+  --drilldown-duration: 280ms;
+  --drilldown-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --drilldown-transition-fast: 150ms;
+
+  position: relative;
+  background: var(--color-white);
+  width: 100%;
+}
+
+/* ============================================
+   KEYFRAME ANIMATIONS
+   ============================================ */
+
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOutToLeft {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-35%); opacity: 0; }
+}
+
+@keyframes slideOutToRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(35%); opacity: 0; }
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.drilldown-header {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-s) 0;
+  border-bottom: 2px solid var(--color-black-90);
+}
+
+.drilldown-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-left: 8px;
+  margin-right: 16px;
+  color: var(--color-black-90);
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform var(--drilldown-transition-fast) ease;
+}
+
+.drilldown-back:hover:not(:disabled) {
+  transform: translateX(-4px);
+}
+
+.drilldown-header:hover .drilldown-back:not(:disabled) {
+  transform: translateX(-4px);
+}
+
+.drilldown-back:disabled {
+  cursor: default;
+}
+
+.drilldown-back:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+.drilldown-section-title {
+  font-family: var(--font-default);
+  font-size: 24px;
+  font-weight: var(--fontweight-medium);
+  color: var(--color-black-90);
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+a.drilldown-section-title:hover {
+  color: var(--color-black-90);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 2px;
+}
+
+a.drilldown-section-title:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   CURRENT PAGE INDICATOR
+   ============================================ */
+
+.drilldown-current-page {
+  padding: var(--spacing-m) var(--spacing-s);
+  padding-left: 16px;
+}
+
+.drilldown-current-label {
+  font-family: var(--font-default);
+  font-size: 24px;
+  font-weight: var(--fontweight-bold);
+  color: var(--color-black-90);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 2px;
+}
+
+a.drilldown-current-label {
+  cursor: pointer;
+}
+
+a.drilldown-current-label:hover {
+  color: var(--color-black-90);
+}
+
+a.drilldown-current-label:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   VIEWPORT & PANELS
+   ============================================ */
+
+.drilldown-viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.drilldown-panel {
+  background: var(--color-white);
+}
+
+.drilldown-panel--current {
+  position: relative;
+  z-index: 2;
+}
+
+.drilldown-panel--enter-from-right {
+  animation: slideInFromRight var(--drilldown-duration) var(--drilldown-ease) both;
+}
+
+.drilldown-panel--enter-from-left {
+  animation: slideInFromLeft var(--drilldown-duration) var(--drilldown-ease) both;
+}
+
+.drilldown-panel--exit-left,
+.drilldown-panel--exit-right {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.drilldown-panel--exit-left {
+  animation: slideOutToLeft var(--drilldown-duration) var(--drilldown-ease) both;
+}
+
+.drilldown-panel--exit-right {
+  animation: slideOutToRight var(--drilldown-duration) var(--drilldown-ease) both;
+}
+
+/* ============================================
+   LIST
+   ============================================ */
+
+.drilldown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+   ITEM ROW
+   ============================================ */
+
+.drilldown-item {
+  border-bottom: 1px solid var(--color-black-20);
+}
+
+.drilldown-item:first-child {
+  border-top: 1px solid var(--color-black-20);
+}
+
+.drilldown-row {
+  display: flex;
+  align-items: stretch;
+  min-height: var(--drilldown-row-height);
+}
+
+.drilldown-row--active {
+  background: transparent;
+}
+
+/* ============================================
+   LINK - Matching SideNavigation styles
+   ============================================ */
+
+.drilldown-link {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-height: var(--drilldown-row-height);
+  padding: var(--spacing-xs) var(--spacing-s);
+  padding-left: 16px;
+  font-family: var(--font-default);
+  font-size: 18px;
+  font-weight: var(--fontweight-regular);
+  color: var(--color-black-90);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--drilldown-transition-fast) ease;
+}
+
+.drilldown-link:hover {
+  color: var(--color-black-90);
+}
+
+.drilldown-link:hover .drilldown-label {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 2px;
+}
+
+/* Hide focus ring on mouse click */
+.drilldown-link:focus {
+  outline: none;
+}
+
+/* Show outline only while mouse is pressed */
+.drilldown-link:active .drilldown-label {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Keyboard navigation focus */
+.drilldown-link:focus-visible .drilldown-label {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+.drilldown-row--active .drilldown-link {
+  font-weight: 700;
+}
+
+.drilldown-label {
+  flex: 1;
+}
+
+/* ============================================
+   CHEVRON BUTTON - Matching SideNavigation toggle
+   ============================================ */
+
+.drilldown-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-black-90);
+  cursor: pointer;
+}
+
+.drilldown-chevron-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  transition: background-color var(--drilldown-transition-fast) ease;
+}
+
+.drilldown-chevron:hover .drilldown-chevron-icon {
+  background: transparent;
+}
+
+.drilldown-chevron:focus,
+.drilldown-chevron:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: -3px;
+  z-index: 1;
+}
+
+.drilldown-chevron svg {
+  width: 28px;
+  height: 28px;
+}
+
+.drilldown-row--active .drilldown-chevron-icon {
+  background: transparent;
+}
+
+.drilldown-row--active .drilldown-chevron:hover .drilldown-chevron-icon {
+  background: transparent;
+}
+
+/* ============================================
+   FOCUS MANAGEMENT
+   ============================================ */
+
+.drilldown button:focus,
+.drilldown button:focus-visible {
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .drilldown-panel--enter-from-right,
+  .drilldown-panel--enter-from-left,
+  .drilldown-panel--exit-left,
+  .drilldown-panel--exit-right {
+    animation: none;
+  }
+
+  .drilldown-back,
+  .drilldown-link,
+  .drilldown-chevron-icon {
+    transition: none;
+  }
+}
