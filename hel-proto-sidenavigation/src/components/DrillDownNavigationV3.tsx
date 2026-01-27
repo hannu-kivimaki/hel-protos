@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { IconAngleRight, IconArrowLeft } from 'hds-react';
+import { IconAngleRight, IconAngleDown, IconArrowLeft, IconCross } from 'hds-react';
 
 export interface NavItem {
   id: string;
@@ -97,7 +97,8 @@ export function DrillDownNavigationV3({
 
   // Recently visited pages (persisted in sessionStorage)
   const RECENT_STORAGE_KEY = 'drilldown-recent';
-  const MAX_RECENT = 4;
+  const RECENT_COLLAPSED_KEY = 'drilldown-recent-collapsed';
+  const MAX_RECENT = 3;
 
   const [recentlyVisited, setRecentlyVisited] = useState<string[]>(() => {
     try {
@@ -108,11 +109,40 @@ export function DrillDownNavigationV3({
     }
   });
 
+  const [recentCollapsed, setRecentCollapsed] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem(RECENT_COLLAPSED_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleRecentCollapsed = useCallback(() => {
+    setRecentCollapsed(prev => {
+      const next = !prev;
+      try {
+        sessionStorage.setItem(RECENT_COLLAPSED_KEY, String(next));
+      } catch { /* ignore */ }
+      return next;
+    });
+  }, []);
+
   // Add to recently visited when navigating
   const addToRecent = useCallback((id: string) => {
     setRecentlyVisited(prev => {
       const filtered = prev.filter(item => item !== id);
       const updated = [id, ...filtered].slice(0, MAX_RECENT);
+      try {
+        sessionStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(updated));
+      } catch { /* ignore */ }
+      return updated;
+    });
+  }, []);
+
+  // Remove from recently visited
+  const removeFromRecent = useCallback((id: string) => {
+    setRecentlyVisited(prev => {
+      const updated = prev.filter(item => item !== id);
       try {
         sessionStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(updated));
       } catch { /* ignore */ }
@@ -567,41 +597,62 @@ export function DrillDownNavigationV3({
       </div>
 
       {/* Recently visited */}
-      {recentlyVisited.length > 0 && (
+      {recentlyVisited.filter(id => id !== activeId).length > 0 && (
         <div className="drilldown-v3-recent">
-          <div className="drilldown-v3-recent-header">Äskettäin katsotut</div>
-          <ul className="drilldown-v3-recent-list">
-            {recentlyVisited
-              .filter(id => id !== activeId)
-              .slice(0, 3)
-              .map((id, index) => {
-                const item = findItem(items, id);
-                if (!item) return null;
-                return (
-                  <li
-                    key={id}
-                    className="drilldown-v3-recent-item"
-                    style={{ '--recent-index': index } as React.CSSProperties}
-                  >
-                    <a
-                      href={`#${id}`}
-                      className="drilldown-v3-recent-link"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        // Find the parent folder and navigate there
-                        const parent = findParent(items, id);
-                        if (parent !== undefined) {
-                          setViewingFolderId(parent?.id ?? null);
-                        }
-                        handleNavigate(id);
-                      }}
+          <button
+            type="button"
+            className="drilldown-v3-recent-header"
+            onClick={toggleRecentCollapsed}
+            aria-expanded={!recentCollapsed}
+          >
+            <span className={`drilldown-v3-recent-icon ${recentCollapsed ? 'drilldown-v3-recent-icon--collapsed' : ''}`}>
+              <IconAngleDown size="s" aria-hidden="true" />
+            </span>
+            <span>Äskettäin katsotut</span>
+          </button>
+          {!recentCollapsed && (
+            <ul className="drilldown-v3-recent-list">
+              {recentlyVisited
+                .filter(id => id !== activeId)
+                .slice(0, MAX_RECENT)
+                .map((id, index) => {
+                  const item = findItem(items, id);
+                  if (!item) return null;
+                  return (
+                    <li
+                      key={id}
+                      className="drilldown-v3-recent-item"
+                      style={{ '--recent-index': index } as React.CSSProperties}
                     >
-                      {item.label}
-                    </a>
-                  </li>
-                );
-              })}
-          </ul>
+                      <div className="drilldown-v3-recent-row">
+                        <a
+                          href={`#${id}`}
+                          className="drilldown-v3-recent-link"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const parent = findParent(items, id);
+                            if (parent !== undefined) {
+                              setViewingFolderId(parent?.id ?? null);
+                            }
+                            handleNavigate(id);
+                          }}
+                        >
+                          {item.label}
+                        </a>
+                        <button
+                          type="button"
+                          className="drilldown-v3-recent-remove"
+                          onClick={() => removeFromRecent(id)}
+                          aria-label={`Poista ${item.label} äskettäin katsotuista`}
+                        >
+                          <IconCross size="s" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+            </ul>
+          )}
         </div>
       )}
     </nav>
