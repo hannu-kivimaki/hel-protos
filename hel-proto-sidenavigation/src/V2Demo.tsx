@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Header, Logo, logoFi, Breadcrumb, Accordion, Link, IconEnvelope, IconPhone } from 'hds-react';
-import { DrillDownNavigation, NavItem } from './components/DrillDownNavigation';
-import './components/DrillDownNavigation.css';
+import { DrillDownNavigationV2, NavItem } from './components/DrillDownNavigationV2';
+import './components/DrillDownNavigationV2.css';
 import './components/SideNavigation.css';
 
-// Navigation structure - simplified to "Tontin hakeminen" section only
+// Navigation structure
 const navigationItems: NavItem[] = [
   {
     id: 'tontin-hakeminen',
@@ -377,12 +378,10 @@ function getBreadcrumb(activeId: string): { title: string; path: string | null }
     'rakentamisen-luvat': 'Rakentamisen luvat',
   };
 
-  // Add "Tontin hakeminen" for child pages (but not for sibling root items)
   if (activeId !== 'tontin-hakeminen' && activeId !== 'rakentamisen-luvat') {
     base.push({ title: 'Tontin hakeminen', path: '#' });
   }
 
-  // Add parent "Tonttihaut ja kilpailut" for its children
   if (activeId === 'tulevat-tonttihaut' || activeId === 'paattyneet-tonttihaut') {
     base.push({ title: 'Tonttihaut ja kilpailut', path: '#' });
   }
@@ -392,14 +391,35 @@ function getBreadcrumb(activeId: string): { title: string; path: string | null }
     base.push({ title: 'Tulevat tonttihaut ja kilpailut', path: '#' });
   }
 
-  // Add current page (null path = current page, not a link)
   base.push({ title: titles[activeId] || activeId, path: null });
 
   return base;
 }
 
 export function V2Demo() {
-  const [activeId, setActiveId] = useState('omakotitalotontit');
+  const location = useLocation();
+
+  // Initialize from URL or default
+  const getInitialPage = () => {
+    const params = new URLSearchParams(location.search);
+    return params.get('page') || 'omakotitalotontit';
+  };
+
+  const [activeId, setActiveId] = useState(getInitialPage);
+
+  // Update activeId when URL changes (browser back/forward)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const pageId = params.get('page');
+    if (pageId && pageId !== activeId) {
+      setActiveId(pageId);
+    }
+  }, [location.search]);
+
+  const handleNavigate = (id: string) => {
+    setActiveId(id);
+    // URL is updated by the navigation component
+  };
 
   const currentPage = pageContent[activeId] || pageContent['omakotitalotontit'];
   const breadcrumbItems = getBreadcrumb(activeId);
@@ -445,11 +465,12 @@ export function V2Demo() {
 
       <div className="content-layout">
         <div className="side-navigation-container">
-          <DrillDownNavigation
+          <DrillDownNavigationV2
             items={navigationItems}
             activeId={activeId}
-            onNavigate={setActiveId}
+            onNavigate={handleNavigate}
             sectionTitle="Tontit ja rakentamisen luvat"
+            baseUrl="/v2"
           />
         </div>
 

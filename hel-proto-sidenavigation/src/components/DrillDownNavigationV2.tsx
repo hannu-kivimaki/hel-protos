@@ -9,7 +9,7 @@ export interface NavItem {
   children?: NavItem[];
 }
 
-interface DrillDownNavigationV3Props {
+interface DrillDownNavigationV2Props {
   items: NavItem[];
   activeId: string;
   onNavigate: (id: string) => void;
@@ -65,14 +65,14 @@ type AnimationState = {
   prevItems: NavItem[];
 };
 
-export function DrillDownNavigationV3({
+export function DrillDownNavigationV2({
   items,
   activeId,
   onNavigate,
   sectionTitle = 'Navigaatio',
   backHref = '#',
   baseUrl = '/v3',
-}: DrillDownNavigationV3Props) {
+}: DrillDownNavigationV2Props) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -245,7 +245,7 @@ export function DrillDownNavigationV3({
   const focusFirstItem = useCallback(() => {
     requestAnimationFrame(() => {
       if (listRef.current) {
-        const firstLink = listRef.current.querySelector('.drilldown-v3-link') as HTMLElement;
+        const firstLink = listRef.current.querySelector('.drilldown-v2-link') as HTMLElement;
         firstLink?.focus();
       }
     });
@@ -416,7 +416,7 @@ export function DrillDownNavigationV3({
 
   const renderList = (listItems: NavItem[], isInteractive = true, isEntering = false) => (
     <ul
-      className="drilldown-v3-list"
+      className="drilldown-v2-list"
       role="list"
       ref={isInteractive ? listRef : undefined}
     >
@@ -427,13 +427,13 @@ export function DrillDownNavigationV3({
         return (
           <li
             key={item.id}
-            className={`drilldown-v3-item ${isEntering ? 'drilldown-v3-item--entering' : ''}`}
+            className={`drilldown-v2-item ${isEntering ? 'drilldown-v2-item--entering' : ''}`}
             style={{ '--item-index': index } as React.CSSProperties}
           >
-            <div className={`drilldown-v3-row ${isActive ? 'drilldown-v3-row--active' : ''}`}>
+            <div className={`drilldown-v2-row ${isActive ? 'drilldown-v2-row--active' : ''}`}>
               <a
                 href={item.href || `#${item.id}`}
-                className="drilldown-v3-link"
+                className="drilldown-v2-link"
                 onClick={(e) => {
                   e.preventDefault();
                   if (isInteractive) handleNavigate(item.id);
@@ -441,17 +441,17 @@ export function DrillDownNavigationV3({
                 aria-current={isActive ? 'page' : undefined}
                 tabIndex={isInteractive ? 0 : -1}
               >
-                <span className="drilldown-v3-label">{item.label}</span>
+                <span className="drilldown-v2-label">{item.label}</span>
               </a>
               {hasChildren && (
                 <button
                   type="button"
-                  className="drilldown-v3-chevron"
+                  className="drilldown-v2-chevron"
                   onClick={(e) => isInteractive && handleDrillIn(e, item.id)}
                   aria-label={`Avaa ${item.label}`}
                   tabIndex={isInteractive ? 0 : -1}
                 >
-                  <span className="drilldown-v3-chevron-icon">
+                  <span className="drilldown-v2-chevron-icon">
                     <IconAngleRight size="m" aria-hidden="true" />
                   </span>
                 </button>
@@ -474,7 +474,7 @@ export function DrillDownNavigationV3({
   return (
     <nav
       ref={navRef}
-      className={`drilldown-v3 ${swipeOffset > 0 ? 'drilldown-v3--swiping' : ''} ${viewingFolderId !== null ? 'drilldown-v3--can-swipe' : ''}`}
+      className={`drilldown-v2 ${swipeOffset > 0 ? 'drilldown-v2--swiping' : ''} ${viewingFolderId !== null ? 'drilldown-v2--can-swipe' : ''}`}
       aria-label="Sivunavigaatio"
       onKeyDown={handleKeyDown}
       onTouchStart={handleTouchStart}
@@ -484,7 +484,7 @@ export function DrillDownNavigationV3({
     >
       {/* Live region for screen reader announcements */}
       <div
-        className="drilldown-v3-live-region"
+        className="drilldown-v2-live-region"
         role="status"
         aria-live="polite"
         aria-atomic="true"
@@ -493,12 +493,12 @@ export function DrillDownNavigationV3({
       </div>
 
       {/* Header */}
-      <div className="drilldown-v3-header">
+      <div className="drilldown-v2-header">
         {showBackButton ? (
           <>
             <button
               type="button"
-              className="drilldown-v3-back"
+              className="drilldown-v2-back"
               onClick={goBack}
               aria-label={`Takaisin: ${backTargetLabel}`}
               disabled={animation.isAnimating}
@@ -506,10 +506,10 @@ export function DrillDownNavigationV3({
             >
               <IconArrowLeft size="s" aria-hidden="true" />
             </button>
-            <div className="drilldown-v3-header-title-wrap">
+            <div className="drilldown-v2-header-title-wrap">
               {headerAnimation && prevHeaderTitle && (
                 <span
-                  className={`drilldown-v3-section-title drilldown-v3-section-title--exit-${headerAnimation}`}
+                  className={`drilldown-v2-section-title drilldown-v2-section-title--exit-${headerAnimation}`}
                   aria-hidden="true"
                 >
                   {prevHeaderTitle}
@@ -517,7 +517,7 @@ export function DrillDownNavigationV3({
               )}
               <a
                 href="#"
-                className={`drilldown-v3-section-title ${headerAnimation ? `drilldown-v3-section-title--enter-${headerAnimation}` : ''}`}
+                className={`drilldown-v2-section-title ${headerAnimation ? `drilldown-v2-section-title--enter-${headerAnimation}` : ''}`}
                 onClick={(e) => {
                   e.preventDefault();
                   goBack();
@@ -532,16 +532,16 @@ export function DrillDownNavigationV3({
           <>
             <a
               href={backHref}
-              className="drilldown-v3-back"
+              className="drilldown-v2-back"
               aria-label={`Takaisin: ${sectionTitle}`}
               ref={backButtonRef as React.RefObject<HTMLAnchorElement>}
             >
               <IconArrowLeft size="s" aria-hidden="true" />
             </a>
-            <div className="drilldown-v3-header-title-wrap">
+            <div className="drilldown-v2-header-title-wrap">
               {headerAnimation && prevHeaderTitle && (
                 <span
-                  className={`drilldown-v3-section-title drilldown-v3-section-title--exit-${headerAnimation}`}
+                  className={`drilldown-v2-section-title drilldown-v2-section-title--exit-${headerAnimation}`}
                   aria-hidden="true"
                 >
                   {prevHeaderTitle}
@@ -549,7 +549,7 @@ export function DrillDownNavigationV3({
               )}
               <a
                 href={backHref}
-                className={`drilldown-v3-section-title ${headerAnimation ? `drilldown-v3-section-title--enter-${headerAnimation}` : ''}`}
+                className={`drilldown-v2-section-title ${headerAnimation ? `drilldown-v2-section-title--enter-${headerAnimation}` : ''}`}
                 onAnimationEnd={handleHeaderAnimationEnd}
               >
                 {sectionTitle}
@@ -560,11 +560,11 @@ export function DrillDownNavigationV3({
       </div>
 
       {/* Current page indicator */}
-      <div className="drilldown-v3-current-page">
+      <div className="drilldown-v2-current-page">
         {currentFolder ? (
           <a
             href={`#${currentFolder.id}`}
-            className="drilldown-v3-current-label"
+            className="drilldown-v2-current-label"
             onClick={(e) => {
               e.preventDefault();
               if (!animation.isAnimating) handleNavigate(currentFolder.id);
@@ -573,18 +573,18 @@ export function DrillDownNavigationV3({
             {currentFolder.label}
           </a>
         ) : (
-          <a href={backHref} className="drilldown-v3-current-label">{sectionTitle}</a>
+          <a href={backHref} className="drilldown-v2-current-label">{sectionTitle}</a>
         )}
       </div>
 
       {/* Navigation panel - no exit panels, just instant swap with cascade */}
-      <div className="drilldown-v3-viewport" ref={viewportRef}>
+      <div className="drilldown-v2-viewport" ref={viewportRef}>
         <div
           key={viewingFolderId ?? 'root'}
-          className={`drilldown-v3-panel drilldown-v3-panel--current ${
-            animation.isAnimating && animation.direction === 'in' ? 'drilldown-v3-panel--enter-from-right' : ''
+          className={`drilldown-v2-panel drilldown-v2-panel--current ${
+            animation.isAnimating && animation.direction === 'in' ? 'drilldown-v2-panel--enter-from-right' : ''
           }${
-            animation.isAnimating && animation.direction === 'out' ? 'drilldown-v3-panel--enter-from-left' : ''
+            animation.isAnimating && animation.direction === 'out' ? 'drilldown-v2-panel--enter-from-left' : ''
           }`}
           onAnimationEnd={handleAnimationEnd}
         >
@@ -598,20 +598,20 @@ export function DrillDownNavigationV3({
 
       {/* Recently visited */}
       {recentlyVisited.filter(id => id !== activeId).length > 0 && (
-        <div className="drilldown-v3-recent">
+        <div className="drilldown-v2-recent">
           <button
             type="button"
-            className="drilldown-v3-recent-header"
+            className="drilldown-v2-recent-header"
             onClick={toggleRecentCollapsed}
             aria-expanded={!recentCollapsed}
           >
-            <span className={`drilldown-v3-recent-icon ${recentCollapsed ? 'drilldown-v3-recent-icon--collapsed' : ''}`}>
+            <span className={`drilldown-v2-recent-icon ${recentCollapsed ? 'drilldown-v2-recent-icon--collapsed' : ''}`}>
               <IconAngleDown size="s" aria-hidden="true" />
             </span>
             <span>Äskettäin katsotut</span>
           </button>
           {!recentCollapsed && (
-            <ul className="drilldown-v3-recent-list">
+            <ul className="drilldown-v2-recent-list">
               {recentlyVisited
                 .filter(id => id !== activeId)
                 .slice(0, MAX_RECENT)
@@ -621,13 +621,13 @@ export function DrillDownNavigationV3({
                   return (
                     <li
                       key={id}
-                      className="drilldown-v3-recent-item"
+                      className="drilldown-v2-recent-item"
                       style={{ '--recent-index': index } as React.CSSProperties}
                     >
-                      <div className="drilldown-v3-recent-row">
+                      <div className="drilldown-v2-recent-row">
                         <a
                           href={`#${id}`}
-                          className="drilldown-v3-recent-link"
+                          className="drilldown-v2-recent-link"
                           onClick={(e) => {
                             e.preventDefault();
                             const parent = findParent(items, id);
@@ -641,7 +641,7 @@ export function DrillDownNavigationV3({
                         </a>
                         <button
                           type="button"
-                          className="drilldown-v3-recent-remove"
+                          className="drilldown-v2-recent-remove"
                           onClick={() => removeFromRecent(id)}
                           aria-label={`Poista ${item.label} äskettäin katsotuista`}
                         >

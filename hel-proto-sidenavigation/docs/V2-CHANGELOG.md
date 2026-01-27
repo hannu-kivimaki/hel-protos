@@ -1,22 +1,22 @@
-# DrillDownNavigation V3 - Development Session
+# DrillDownNavigation V2 - Development Session
 
 ## Overview
 
-V3 is a premium mobile-style drill-down navigation component evolved from V2. The key design shift was removing horizontal slide transitions in favor of **vertical cascade reveals**, creating a lighter, more immediate feel of "opening folders" rather than "traveling between screens."
+V2 is a premium mobile-style drill-down navigation component. The key design shift was removing horizontal slide transitions in favor of **vertical cascade reveals**, creating a lighter, more immediate feel of "opening folders" rather than "traveling between screens."
 
 ## Route
 
-Access at `/#/v3`
+Access at `/#/v2`
 
 ## Files Created/Modified
 
 ```
 src/
-├── V3Demo.tsx                          # Demo page for V3
+├── V2Demo.tsx                          # Demo page for V2
 ├── components/
-│   ├── DrillDownNavigationV3.tsx       # Main component
-│   └── DrillDownNavigationV3.css       # Styles
-└── App.tsx                             # Added /v3 route
+│   ├── DrillDownNavigationV2.tsx       # Main component
+│   └── DrillDownNavigationV2.css       # Styles
+└── App.tsx                             # Added /v2 route
 ```
 
 ---
@@ -60,7 +60,7 @@ src/
 ## Design Decisions
 
 ### No Horizontal Slide
-The V2 horizontal slide felt heavy. V3 uses instant panel swap with vertical cascade:
+The V2 horizontal slide felt heavy. V2 uses instant panel swap with vertical cascade:
 - **Drill in**: Items fall down from above
 - **Drill out**: Items rise up from below
 

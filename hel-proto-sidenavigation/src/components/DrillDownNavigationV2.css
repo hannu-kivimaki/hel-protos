@@ -2,7 +2,7 @@
 /* Phase 1: Staggered reveals, scroll restoration, focus management, announcements, URL sync */
 /* Design: Instant panel swap with cascading item reveals - no horizontal slide */
 
-.drilldown-v3 {
+.drilldown-v2 {
   --drilldown-row-height: 56px;
   --drilldown-duration: 220ms;
   --drilldown-ease: cubic-bezier(0.32, 0.72, 0, 1);
@@ -20,12 +20,12 @@
    SWIPE GESTURE FEEDBACK
    ============================================ */
 
-.drilldown-v3--swiping .drilldown-v3-viewport {
+.drilldown-v2--swiping .drilldown-v2-viewport {
   transform: translateX(var(--swipe-offset, 0));
   opacity: calc(1 - var(--swipe-offset, 0) / 300);
 }
 
-.drilldown-v3--swiping::before {
+.drilldown-v2--swiping::before {
   content: '';
   position: absolute;
   left: 0;
@@ -43,7 +43,7 @@
    ============================================ */
 
 /* Subtle left edge hint when swipe is available */
-.drilldown-v3--can-swipe .drilldown-v3-viewport::before {
+.drilldown-v2--can-swipe .drilldown-v2-viewport::before {
   content: '';
   position: absolute;
   left: 0;
@@ -68,7 +68,7 @@
    LIVE REGION (Screen Reader Announcements)
    ============================================ */
 
-.drilldown-v3-live-region {
+.drilldown-v2-live-region {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -122,7 +122,7 @@
    HEADER
    ============================================ */
 
-.drilldown-v3-header {
+.drilldown-v2-header {
   display: flex;
   align-items: center;
   padding: var(--spacing-s) 0;
@@ -130,7 +130,7 @@
   position: relative;
 }
 
-.drilldown-v3-back {
+.drilldown-v2-back {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,36 +147,36 @@
   transition: transform 250ms var(--drilldown-spring);
 }
 
-.drilldown-v3-back:hover:not(:disabled) {
+.drilldown-v2-back:hover:not(:disabled) {
   transform: translateX(-5px);
 }
 
-.drilldown-v3-header:hover .drilldown-v3-back:not(:disabled) {
+.drilldown-v2-header:hover .drilldown-v2-back:not(:disabled) {
   transform: translateX(-5px);
 }
 
-.drilldown-v3-back:active:not(:disabled) {
+.drilldown-v2-back:active:not(:disabled) {
   transform: translateX(-7px) scale(0.95);
   transition: transform 100ms ease;
 }
 
-.drilldown-v3-back:disabled {
+.drilldown-v2-back:disabled {
   cursor: default;
 }
 
-.drilldown-v3-back:focus-visible {
+.drilldown-v2-back:focus-visible {
   outline: 3px solid var(--color-black-90);
   outline-offset: 2px;
 }
 
-.drilldown-v3-header-title-wrap {
+.drilldown-v2-header-title-wrap {
   flex: 1;
   position: relative;
   overflow: hidden;
   min-height: 24px;
 }
 
-.drilldown-v3-section-title {
+.drilldown-v2-section-title {
   font-family: var(--font-default);
   font-size: 18px;
   font-weight: var(--fontweight-medium);
@@ -187,13 +187,13 @@
 }
 
 /* Hover on header affects both arrow and title */
-.drilldown-v3-header:hover .drilldown-v3-section-title {
+.drilldown-v2-header:hover .drilldown-v2-section-title {
   text-decoration: underline;
   text-underline-offset: 0.15em;
   text-decoration-thickness: 2px;
 }
 
-a.drilldown-v3-section-title:focus-visible {
+a.drilldown-v2-section-title:focus-visible {
   outline: 3px solid var(--color-black-90);
   outline-offset: 2px;
 }
@@ -220,27 +220,27 @@ a.drilldown-v3-section-title:focus-visible {
 }
 
 /* Enter animations (new title coming in) */
-.drilldown-v3-section-title--enter-in {
+.drilldown-v2-section-title--enter-in {
   animation: headerSlideInFromRight 180ms var(--drilldown-ease) both;
 }
 
-.drilldown-v3-section-title--enter-out {
+.drilldown-v2-section-title--enter-out {
   animation: headerSlideInFromLeft 180ms var(--drilldown-ease) both;
 }
 
 /* Exit animations (old title going out) */
-.drilldown-v3-section-title--exit-in,
-.drilldown-v3-section-title--exit-out {
+.drilldown-v2-section-title--exit-in,
+.drilldown-v2-section-title--exit-out {
   position: absolute;
   top: 0;
   left: 0;
 }
 
-.drilldown-v3-section-title--exit-in {
+.drilldown-v2-section-title--exit-in {
   animation: headerSlideOutToLeft 180ms var(--drilldown-ease) both;
 }
 
-.drilldown-v3-section-title--exit-out {
+.drilldown-v2-section-title--exit-out {
   animation: headerSlideOutToRight 180ms var(--drilldown-ease) both;
 }
 
@@ -249,12 +249,12 @@ a.drilldown-v3-section-title:focus-visible {
    CURRENT PAGE INDICATOR
    ============================================ */
 
-.drilldown-v3-current-page {
+.drilldown-v2-current-page {
   padding: var(--spacing-m) var(--spacing-s);
   padding-left: 16px;
 }
 
-.drilldown-v3-current-label {
+.drilldown-v2-current-label {
   font-family: var(--font-default);
   font-size: 24px;
   font-weight: var(--fontweight-bold);
@@ -264,15 +264,15 @@ a.drilldown-v3-section-title:focus-visible {
   text-decoration-thickness: 2px;
 }
 
-a.drilldown-v3-current-label {
+a.drilldown-v2-current-label {
   cursor: pointer;
 }
 
-a.drilldown-v3-current-label:hover {
+a.drilldown-v2-current-label:hover {
   color: var(--color-black-90);
 }
 
-a.drilldown-v3-current-label:focus-visible {
+a.drilldown-v2-current-label:focus-visible {
   outline: 3px solid var(--color-black-90);
   outline-offset: 2px;
 }
@@ -281,29 +281,29 @@ a.drilldown-v3-current-label:focus-visible {
    VIEWPORT & PANELS
    ============================================ */
 
-.drilldown-v3-viewport {
+.drilldown-v2-viewport {
   position: relative;
   overflow: hidden;
 }
 
-.drilldown-v3-panel {
+.drilldown-v2-panel {
   background: var(--color-white);
 }
 
-.drilldown-v3-panel--current {
+.drilldown-v2-panel--current {
   position: relative;
   z-index: 2;
 }
 
 /* No horizontal slide - just instant swap with list fade */
-.drilldown-v3-panel--enter-from-right,
-.drilldown-v3-panel--enter-from-left {
+.drilldown-v2-panel--enter-from-right,
+.drilldown-v2-panel--enter-from-left {
   animation: listAppear 150ms ease both;
 }
 
 /* Hide exiting panels instantly */
-.drilldown-v3-panel--exit-left,
-.drilldown-v3-panel--exit-right {
+.drilldown-v2-panel--exit-left,
+.drilldown-v2-panel--exit-right {
   display: none;
 }
 
@@ -312,13 +312,13 @@ a.drilldown-v3-current-label:focus-visible {
    ============================================ */
 
 /* Drilling IN: Items cascade DOWN (feeling of descending into hierarchy) */
-.drilldown-v3-panel--enter-from-right .drilldown-v3-item--entering {
+.drilldown-v2-panel--enter-from-right .drilldown-v2-item--entering {
   animation: cascadeDown 200ms var(--drilldown-ease) backwards;
   animation-delay: calc(var(--item-index, 0) * var(--drilldown-stagger-delay));
 }
 
 /* Drilling OUT (back): Items cascade UP (feeling of ascending back) */
-.drilldown-v3-panel--enter-from-left .drilldown-v3-item--entering {
+.drilldown-v2-panel--enter-from-left .drilldown-v2-item--entering {
   animation: cascadeUp 200ms var(--drilldown-ease) backwards;
   animation-delay: calc(var(--item-index, 0) * var(--drilldown-stagger-delay));
 }
@@ -327,7 +327,7 @@ a.drilldown-v3-current-label:focus-visible {
    LIST
    ============================================ */
 
-.drilldown-v3-list {
+.drilldown-v2-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -337,15 +337,15 @@ a.drilldown-v3-current-label:focus-visible {
    ITEM ROW
    ============================================ */
 
-.drilldown-v3-item {
+.drilldown-v2-item {
   border-bottom: 1px solid var(--color-black-20);
 }
 
-.drilldown-v3-item:first-child {
+.drilldown-v2-item:first-child {
   border-top: 1px solid var(--color-black-20);
 }
 
-.drilldown-v3-row {
+.drilldown-v2-row {
   display: flex;
   align-items: stretch;
   min-height: var(--drilldown-row-height);
@@ -353,7 +353,7 @@ a.drilldown-v3-current-label:focus-visible {
 }
 
 /* Active item indicator bar */
-.drilldown-v3-row--active::before {
+.drilldown-v2-row--active::before {
   content: '';
   position: absolute;
   left: 0;
@@ -380,7 +380,7 @@ a.drilldown-v3-current-label:focus-visible {
    LINK
    ============================================ */
 
-.drilldown-v3-link {
+.drilldown-v2-link {
   display: flex;
   align-items: center;
   flex: 1;
@@ -400,40 +400,40 @@ a.drilldown-v3-current-label:focus-visible {
     transform var(--drilldown-transition-fast) ease;
 }
 
-.drilldown-v3-link:hover {
+.drilldown-v2-link:hover {
   color: var(--color-black-90);
 }
 
-.drilldown-v3-link:hover .drilldown-v3-label {
+.drilldown-v2-link:hover .drilldown-v2-label {
   text-decoration: underline;
   text-underline-offset: 0.2em;
   text-decoration-thickness: 2px;
 }
 
 /* Press/active state - spring scale */
-.drilldown-v3-link:active {
+.drilldown-v2-link:active {
   transform: scale(0.97);
   transition: transform 80ms ease-out;
 }
 
 /* Hide focus ring on mouse click */
-.drilldown-v3-link:focus {
+.drilldown-v2-link:focus {
   outline: none;
 }
 
 /* Keyboard navigation focus */
-.drilldown-v3-link:focus-visible .drilldown-v3-label {
+.drilldown-v2-link:focus-visible .drilldown-v2-label {
   outline: 3px solid var(--color-black-90);
   outline-offset: 2px;
   position: relative;
   z-index: 2;
 }
 
-.drilldown-v3-row--active .drilldown-v3-link {
+.drilldown-v2-row--active .drilldown-v2-link {
   font-weight: 700;
 }
 
-.drilldown-v3-label {
+.drilldown-v2-label {
   flex: 1;
 }
 
@@ -441,7 +441,7 @@ a.drilldown-v3-current-label:focus-visible {
    CHEVRON BUTTON
    ============================================ */
 
-.drilldown-v3-chevron {
+.drilldown-v2-chevron {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -456,7 +456,7 @@ a.drilldown-v3-current-label:focus-visible {
   cursor: pointer;
 }
 
-.drilldown-v3-chevron-icon {
+.drilldown-v2-chevron-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -467,28 +467,28 @@ a.drilldown-v3-current-label:focus-visible {
 }
 
 /* Chevron nudge on row hover */
-.drilldown-v3-row:hover .drilldown-v3-chevron-icon {
+.drilldown-v2-row:hover .drilldown-v2-chevron-icon {
   transform: translateX(4px);
 }
 
-.drilldown-v3-chevron:hover .drilldown-v3-chevron-icon {
+.drilldown-v2-chevron:hover .drilldown-v2-chevron-icon {
   transform: translateX(6px);
 }
 
 /* Press state - spring back */
-.drilldown-v3-chevron:active .drilldown-v3-chevron-icon {
+.drilldown-v2-chevron:active .drilldown-v2-chevron-icon {
   transform: translateX(8px) scale(0.92);
   transition: transform 80ms ease-out;
 }
 
-.drilldown-v3-chevron:focus,
-.drilldown-v3-chevron:focus-visible {
+.drilldown-v2-chevron:focus,
+.drilldown-v2-chevron:focus-visible {
   outline: 3px solid var(--color-black-90);
   outline-offset: -3px;
   z-index: 1;
 }
 
-.drilldown-v3-chevron svg {
+.drilldown-v2-chevron svg {
   width: 28px;
   height: 28px;
 }
@@ -497,11 +497,11 @@ a.drilldown-v3-current-label:focus-visible {
    RECENTLY VISITED
    ============================================ */
 
-.drilldown-v3-recent {
+.drilldown-v2-recent {
   margin-top: var(--spacing-m);
 }
 
-button.drilldown-v3-recent-header {
+button.drilldown-v2-recent-header {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -517,39 +517,39 @@ button.drilldown-v3-recent-header {
   text-align: left;
 }
 
-button.drilldown-v3-recent-header:hover {
+button.drilldown-v2-recent-header:hover {
   text-decoration: underline;
   text-underline-offset: 0.15em;
   text-decoration-thickness: 2px;
 }
 
-button.drilldown-v3-recent-header:focus-visible {
+button.drilldown-v2-recent-header:focus-visible {
   outline: 3px solid var(--color-black-90);
   outline-offset: 2px;
 }
 
-.drilldown-v3-recent-icon {
+.drilldown-v2-recent-icon {
   display: flex;
   transition: transform 200ms var(--drilldown-ease);
 }
 
-.drilldown-v3-recent-icon--collapsed {
+.drilldown-v2-recent-icon--collapsed {
   transform: rotate(-90deg);
 }
 
-.drilldown-v3-recent-list {
+.drilldown-v2-recent-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.drilldown-v3-recent-item {
+.drilldown-v2-recent-item {
   border-bottom: 1px solid var(--color-black-10);
   animation: recentReveal 200ms var(--drilldown-ease) backwards;
   animation-delay: calc(var(--recent-index, 0) * 40ms);
 }
 
-.drilldown-v3-recent-item:first-child {
+.drilldown-v2-recent-item:first-child {
   border-top: 1px solid var(--color-black-10);
 }
 
@@ -564,13 +564,13 @@ button.drilldown-v3-recent-header:focus-visible {
   }
 }
 
-.drilldown-v3-recent-row {
+.drilldown-v2-recent-row {
   display: flex;
   align-items: stretch;
   min-height: var(--drilldown-row-height);
 }
 
-.drilldown-v3-recent-link {
+.drilldown-v2-recent-link {
   display: flex;
   align-items: center;
   flex: 1;
@@ -584,24 +584,24 @@ button.drilldown-v3-recent-header:focus-visible {
   transition: transform 200ms var(--drilldown-spring);
 }
 
-.drilldown-v3-recent-link:hover {
+.drilldown-v2-recent-link:hover {
   color: var(--color-black-90);
   text-decoration: underline;
   text-underline-offset: 0.15em;
   text-decoration-thickness: 2px;
 }
 
-.drilldown-v3-recent-link:active {
+.drilldown-v2-recent-link:active {
   transform: scale(0.98);
   transition: transform 80ms ease-out;
 }
 
-.drilldown-v3-recent-link:focus-visible {
+.drilldown-v2-recent-link:focus-visible {
   outline: 3px solid var(--color-black-90);
   outline-offset: 2px;
 }
 
-.drilldown-v3-recent-remove {
+.drilldown-v2-recent-remove {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -616,11 +616,11 @@ button.drilldown-v3-recent-header:focus-visible {
   transition: color 150ms ease;
 }
 
-.drilldown-v3-recent-remove:hover {
+.drilldown-v2-recent-remove:hover {
   color: var(--color-black-90);
 }
 
-.drilldown-v3-recent-remove:focus-visible {
+.drilldown-v2-recent-remove:focus-visible {
   outline: 3px solid var(--color-black-90);
   outline-offset: -3px;
 }
@@ -629,8 +629,8 @@ button.drilldown-v3-recent-header:focus-visible {
    FOCUS MANAGEMENT
    ============================================ */
 
-.drilldown-v3 button:focus,
-.drilldown-v3 button:focus-visible {
+.drilldown-v2 button:focus,
+.drilldown-v2 button:focus-visible {
   position: relative;
   z-index: 2;
 }
@@ -640,36 +640,36 @@ button.drilldown-v3-recent-header:focus-visible {
    ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
-  .drilldown-v3-panel--enter-from-right,
-  .drilldown-v3-panel--enter-from-left {
+  .drilldown-v2-panel--enter-from-right,
+  .drilldown-v2-panel--enter-from-left {
     animation: none;
   }
 
-  .drilldown-v3-panel--enter-from-right .drilldown-v3-item--entering,
-  .drilldown-v3-panel--enter-from-left .drilldown-v3-item--entering {
+  .drilldown-v2-panel--enter-from-right .drilldown-v2-item--entering,
+  .drilldown-v2-panel--enter-from-left .drilldown-v2-item--entering {
     animation: none;
   }
 
-  .drilldown-v3-row--active::before {
+  .drilldown-v2-row--active::before {
     animation: none;
   }
 
-  .drilldown-v3-section-title--enter-in,
-  .drilldown-v3-section-title--enter-out,
-  .drilldown-v3-section-title--exit-in,
-  .drilldown-v3-section-title--exit-out {
+  .drilldown-v2-section-title--enter-in,
+  .drilldown-v2-section-title--enter-out,
+  .drilldown-v2-section-title--exit-in,
+  .drilldown-v2-section-title--exit-out {
     animation: none;
   }
 
-  .drilldown-v3-back,
-  .drilldown-v3-link,
-  .drilldown-v3-chevron-icon,
-  .drilldown-v3-recent-link,
-  .drilldown-v3-recent-icon {
+  .drilldown-v2-back,
+  .drilldown-v2-link,
+  .drilldown-v2-chevron-icon,
+  .drilldown-v2-recent-link,
+  .drilldown-v2-recent-icon {
     transition: none;
   }
 
-  .drilldown-v3-recent-item {
+  .drilldown-v2-recent-item {
     animation: none;
   }
 }
@@ -679,15 +679,15 @@ button.drilldown-v3-recent-header:focus-visible {
    ============================================ */
 
 @media (forced-colors: active) {
-  .drilldown-v3-row--active::before {
+  .drilldown-v2-row--active::before {
     background: CanvasText;
   }
 
-  .drilldown-v3-item {
+  .drilldown-v2-item {
     border-color: CanvasText;
   }
 
-  .drilldown-v3-header {
+  .drilldown-v2-header {
     border-color: CanvasText;
   }
 }
@@ -697,17 +697,17 @@ button.drilldown-v3-recent-header:focus-visible {
    ============================================ */
 
 @media print {
-  .drilldown-v3-depth-indicator,
-  .drilldown-v3-chevron {
+  .drilldown-v2-depth-indicator,
+  .drilldown-v2-chevron {
     display: none;
   }
 
-  .drilldown-v3-panel--exit-left,
-  .drilldown-v3-panel--exit-right {
+  .drilldown-v2-panel--exit-left,
+  .drilldown-v2-panel--exit-right {
     display: none;
   }
 
-  .drilldown-v3-row--active::before {
+  .drilldown-v2-row--active::before {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
