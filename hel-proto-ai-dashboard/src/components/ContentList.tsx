@@ -163,67 +163,69 @@ function InsightChip({ insight }: { insight: AiInsight }) {
       role="note"
       aria-label={isDuplicate ? 'AI-huomio: mahdollinen päällekkäinen sisältö' : 'AI-huomio: linkitysehdotus'}
     >
-      {isDuplicate
-        ? <IconAlertCircle className={styles.insightIcon} aria-hidden />
-        : <IconLink className={styles.insightIcon} aria-hidden />
-      }
+      {/* Rivi 1: ikoni + teksti */}
+      <div className={styles.insightBody}>
+        {isDuplicate
+          ? <IconAlertCircle className={styles.insightIcon} aria-hidden />
+          : <IconLink className={styles.insightIcon} aria-hidden />
+        }
+        <span className={styles.insightText}>
+          <span className={styles.insightLabel}>
+            {isDuplicate ? 'Päällekkäinen sisältö:' : 'Linkitysehdotus:'}
+          </span>{' '}
+          <a href={insight.targetUrl} className={styles.insightLink}>
+            {insight.targetTitle}
+          </a>
+        </span>
+      </div>
 
-      <span className={styles.insightText}>
-        <span className={styles.insightLabel}>
-          {isDuplicate ? 'Päällekkäinen sisältö:' : 'Linkitysehdotus:'}
-        </span>{' '}
-        <a href={insight.targetUrl} className={styles.insightLink}>
-          {insight.targetTitle}
-        </a>
-      </span>
-
-      {isDuplicate && (
-        <>
-          {/* ✅ HDS Core: Button – Suoraan Drupalissa */}
-          <Button
-            ref={compareButtonRef}
-            variant="supplementary"
-            size="small"
-            iconLeft={<IconDocumentGroup aria-hidden />}
-            iconRight={null as unknown as React.ReactNode}
-            onClick={() => setCompareOpen(true)}
-            aria-label={`Vertaa sivuja: ${insight.sourceTitle} ja ${insight.targetTitle}`}
-            className={styles.insightAction}
-          >
-            Vertaa sivuja
-          </Button>
-          {/* ⚠️ HDS React: Dialog – VAATII Drupal-sovituksen */}
-          <CompareDialog
-            isOpen={compareOpen}
-            onClose={() => setCompareOpen(false)}
-            triggerRef={compareButtonRef}
-          />
-        </>
-      )}
-      {!isDuplicate && (
-        <>
-          {/* ✅ HDS Core: Button – Suoraan Drupalissa */}
-          <Button
-            ref={reasonButtonRef}
-            variant="supplementary"
-            size="small"
-            iconLeft={<IconInfoCircle aria-hidden />}
-            iconRight={null as unknown as React.ReactNode}
-            onClick={() => setReasonOpen(true)}
-            aria-label={`Katso linkitysehdotuksen peruste: ${insight.targetTitle}`}
-            className={styles.insightAction}
-          >
-            Katso ehdotusperuste
-          </Button>
-          {/* ⚠️ HDS React: Dialog – VAATII Drupal-sovituksen */}
-          <LinkSuggestionDialog
-            isOpen={reasonOpen}
-            onClose={() => setReasonOpen(false)}
-            insight={insight}
-            triggerRef={reasonButtonRef}
-          />
-        </>
-      )}
+      {/* Rivi 2 (mobiilissa alapuolella): nappi + dialogi */}
+      <div className={styles.insightActions}>
+        {isDuplicate ? (
+          <>
+            {/* ✅ HDS Core: Button – Suoraan Drupalissa */}
+            <Button
+              ref={compareButtonRef}
+              variant="supplementary"
+              size="small"
+              iconLeft={<IconDocumentGroup aria-hidden />}
+              iconRight={null as unknown as React.ReactNode}
+              onClick={() => setCompareOpen(true)}
+              aria-label={`Vertaa sivuja: ${insight.sourceTitle} ja ${insight.targetTitle}`}
+            >
+              Vertaa sivuja
+            </Button>
+            {/* ⚠️ HDS React: Dialog – VAATII Drupal-sovituksen */}
+            <CompareDialog
+              isOpen={compareOpen}
+              onClose={() => setCompareOpen(false)}
+              triggerRef={compareButtonRef}
+            />
+          </>
+        ) : (
+          <>
+            {/* ✅ HDS Core: Button – Suoraan Drupalissa */}
+            <Button
+              ref={reasonButtonRef}
+              variant="supplementary"
+              size="small"
+              iconLeft={<IconInfoCircle aria-hidden />}
+              iconRight={null as unknown as React.ReactNode}
+              onClick={() => setReasonOpen(true)}
+              aria-label={`Katso linkitysehdotuksen peruste: ${insight.targetTitle}`}
+            >
+              Katso ehdotusperuste
+            </Button>
+            {/* ⚠️ HDS React: Dialog – VAATII Drupal-sovituksen */}
+            <LinkSuggestionDialog
+              isOpen={reasonOpen}
+              onClose={() => setReasonOpen(false)}
+              insight={insight}
+              triggerRef={reasonButtonRef}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }

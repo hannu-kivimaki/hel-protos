@@ -206,7 +206,6 @@
 .insightChip {
   display: flex;
   align-items: center;
-  flex-wrap: nowrap;
   gap: var(--spacing-2xs, 8px);
   padding: 0 var(--spacing-m);
   min-height: 52px;
@@ -220,18 +219,25 @@
   border-top-color: var(--color-black-20);
 }
 
+/* Ikoni + teksti samalla rivillä */
+.insightBody {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xs, 8px);
+  flex: 1;
+  min-width: 0;
+}
+
 .insightIcon {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
 }
 
-/* Päällekkäinen sisältö: varoitussävy */
 .insightChip--duplicate .insightIcon {
   color: var(--color-black-70);
 }
 
-/* Linkitysehdotus: informatiivinen sävy */
 .insightChip--link .insightIcon {
   color: var(--color-coat-of-arms);
 }
@@ -257,26 +263,26 @@
   text-decoration-thickness: 2px;
 }
 
-
-.insightAction {
+/* Nappi + dialogi omassa wrapperissa — eristetty flex-layoutista */
+.insightActions {
   flex-shrink: 0;
 }
 
 @media (max-width: 576px) {
   .insightChip {
-    flex-wrap: wrap;
+    flex-direction: column;
     align-items: flex-start;
     padding-top: var(--spacing-s);
     padding-bottom: var(--spacing-s);
     min-height: auto;
+    gap: var(--spacing-xs);
   }
 
-  .insightText {
-    flex: 1;
+  .insightBody {
+    width: 100%;
   }
 
-  .insightAction {
-    flex: 0 0 auto;
+  .insightActions {
     margin-left: calc(16px + var(--spacing-2xs, 8px)); /* tasataan tekstin kanssa */
   }
 }
