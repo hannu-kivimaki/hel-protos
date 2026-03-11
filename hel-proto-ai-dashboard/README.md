@@ -243,6 +243,48 @@ Muita päällekkäisyysryhmiä:
 
 ---
 
+## GitHub ja julkaisu
+
+### Repositorio
+
+```
+https://github.com/hannu-kivimaki/hel-protos
+```
+
+Prototyyppi sijaitsee hakemistossa `hel-proto-ai-dashboard/` monorepo-rakenteen sisällä (samassa repossa kuin `hel-proto-sidenavigation/`).
+
+### GitHub Pages — live-osoite
+
+```
+https://hannu-kivimaki.github.io/hel-protos/hel-proto-ai-dashboard/
+```
+
+### Automaattinen deploy
+
+Push `main`-haaraan käynnistää GitHub Actions -workflown (`.github/workflows/deploy.yml`), joka:
+
+1. Buildaa `hel-proto-sidenavigation/` → `dist/`
+2. Buildaa `hel-proto-ai-dashboard/` → `dist/`
+3. Yhdistää build-tulokset yhteen artifaktiin (sidenavigation juureen, dashboard alihakemistoon)
+4. Deployaa GitHub Pagesiin
+
+Build kestää n. 2–3 minuuttia. Tilan voi tarkistaa:
+```
+https://github.com/hannu-kivimaki/hel-protos/actions
+```
+
+### Hakukoneet
+
+Sivusto on suojattu indeksoinnilta kahdella tasolla:
+- `hel-proto-sidenavigation/public/robots.txt` — `Disallow: /` koko sivustolle
+- `<meta name="robots" content="noindex, nofollow">` molemmissa `index.html`-tiedostoissa
+
+### Paikallinen kehitys vs. GitHub Pages
+
+`vite.config.ts`:ssa on määritelty `base: '/hel-protos/hel-proto-ai-dashboard/'`, joka vaaditaan GitHub Pagesin alihakemistorakenteeseen. Paikallinen kehityspalvelin (`npm run dev`) toimii normaalisti osoitteessa `http://localhost:5173` tästä huolimatta.
+
+---
+
 ## Tekniset huomiot
 
 - React 18 + TypeScript + Vite
