@@ -1,0 +1,25 @@
+.greeting {
+  margin-bottom: var(--spacing-xl);
+}
+
+.greetingTitle {
+  font-size: var(--fontsize-heading-xl);
+  font-weight: 400;
+  letter-spacing: -1.0px;
+  line-height: var(--lineheight-s);
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--color-black-90);
+}
+
+.greetingMeta {
+  font-size: var(--fontsize-body-m);
+  color: var(--color-black-60);
+  margin: 0;
+}
+
+@media (max-width: 576px) {
+  .greetingTitle {
+    font-size: var(--fontsize-heading-l);
+    letter-spacing: -0.4px;
+  }
+}

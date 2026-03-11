@@ -1,0 +1,87 @@
+.dialog {
+  max-width: 560px;
+}
+
+/* Sivujen suhde */
+.pagesRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+  margin-bottom: var(--spacing-m);
+  padding: var(--spacing-m);
+  background: var(--color-black-5);
+  border-radius: 2px;
+}
+
+.pageCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pageRole {
+  font-size: var(--fontsize-body-s);
+  color: var(--color-black-50);
+  margin: 0;
+  font-weight: 700;
+}
+
+.pageTitle {
+  font-size: var(--fontsize-body-m);
+  font-weight: 500;
+  color: var(--color-black-90);
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+  text-decoration-thickness: 1px;
+  line-height: var(--lineheight-m);
+}
+
+.pageTitle:hover {
+  text-decoration-thickness: 2px;
+}
+
+.pageSection {
+  font-size: var(--fontsize-body-s);
+  color: var(--color-black-50);
+  margin: 0;
+}
+
+.arrow {
+  flex-shrink: 0;
+  color: var(--color-black-40);
+  width: 24px;
+  height: 24px;
+  margin-top: 24px; /* kohdistuu pageTitle-riville */
+}
+
+/* AI-peruste */
+.reasonBlock {
+  border-left: 3px solid var(--color-coat-of-arms);
+  padding-left: var(--spacing-s);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.reasonLabel {
+  font-size: var(--fontsize-body-s);
+  font-weight: 700;
+  color: var(--color-black-70);
+  margin: 0;
+}
+
+.reasonText {
+  font-size: var(--fontsize-body-m);
+  color: var(--color-black-90);
+  line-height: var(--lineheight-l);
+  margin: 0;
+}
+
+.reasonMeta {
+  font-size: var(--fontsize-body-s);
+  color: var(--color-black-50);
+  line-height: var(--lineheight-l);
+  margin: 0;
+}

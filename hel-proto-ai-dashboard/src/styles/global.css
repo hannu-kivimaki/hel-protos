@@ -1,0 +1,266 @@
+/**
+ * Global styles – hel-proto-ai-dashboard
+ * Fontit ja header-pattern: hel-proto-sidenavigation
+ */
+
+/* Helsinki Grotesk Font Definitions */
+@font-face {
+  font-family: HelsinkiGrotesk;
+  src: url(https://makasiini.hel.ninja/delivery/HelsinkiGrotesk/565d73a693abe0776c801607ac28f0bf.woff) format("woff");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: HelsinkiGrotesk;
+  src: url(https://makasiini.hel.ninja/delivery/HelsinkiGrotesk/5bb29e3b7b1d3ef30121229bbe67c3e1.woff) format("woff");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: HelsinkiGrotesk;
+  src: url(https://makasiini.hel.ninja/delivery/HelsinkiGrotesk/7c46f288e8133b87e6b12b45dac71865.woff) format("woff");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: HelsinkiGrotesk;
+  src: url(https://makasiini.hel.ninja/delivery/HelsinkiGrotesk/e62dc97e83a385e4d8cdc939cf1e4213.woff) format("woff");
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: HelsinkiGrotesk;
+  src: url(https://makasiini.hel.ninja/delivery/HelsinkiGrotesk/533af26cf28d7660f24c2884d3c27eac.woff) format("woff");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: HelsinkiGrotesk;
+  src: url(https://makasiini.hel.ninja/delivery/HelsinkiGrotesk/20d494430c87e15e194932b729d48270.woff) format("woff");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: HelsinkiGrotesk;
+  src: url(https://makasiini.hel.ninja/delivery/HelsinkiGrotesk/a50a1bd245ce63abcc0d1da80ff790d2.woff) format("woff");
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: HelsinkiGrotesk;
+  src: url(https://makasiini.hel.ninja/delivery/HelsinkiGrotesk/62a1781d8b396fbb025b0552cf6304d2.woff) format("woff");
+  font-weight: 900;
+  font-style: italic;
+}
+
+/* Reset and base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Estetään horisontaalinen scroll — HDS Header voi ylivuotaa ilman tätä */
+html {
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  font-family: HelsinkiGrotesk, Arial, sans-serif;
+  font-size: var(--fontsize-body-m);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-black-90);
+  background-color: var(--color-white);
+  text-rendering: optimizeLegibility;
+}
+
+/* Header – HDS UniversalBar rajoitettu viewporttiin kaikilla leveydillä */
+.app-header {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Header overrides – vain desktop, ei häiritä HDS:n mobiilihamburgeria */
+@media (min-width: 769px) {
+  .app-header {
+    --logo-height: 54px;
+  }
+
+  .app-header [class*='HeaderActionBar-module_logo'] {
+    height: 54px;
+  }
+
+  .app-header [class*='HeaderActionBar-module_logo'] img {
+    height: 54px;
+    width: auto;
+  }
+
+  .app-header .app-header-actionbar [class*='HeaderActionBar-module_title'] {
+    font-size: var(--fontsize-heading-s) !important;
+    line-height: var(--lineheight-s) !important;
+  }
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: HelsinkiGrotesk, Arial, sans-serif;
+  color: var(--color-black-90);
+  margin-top: 0;
+}
+
+h1 {
+  font-size: var(--fontsize-heading-xl);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-l);
+}
+
+h2 {
+  font-size: var(--fontsize-heading-l);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: var(--spacing-m);
+}
+
+h3 {
+  font-size: var(--fontsize-heading-m);
+  font-weight: 500;
+  line-height: 1.33;
+  margin-bottom: var(--spacing-s);
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--spacing-s);
+}
+
+/* Layout */
+.page-layout {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Centered container – max-width matches Header */
+.centered-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0;
+}
+
+/* Breadcrumb override – sama padding kuin header */
+.centered-container nav[class*="Breadcrumb"] {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+.centered-container nav[class*="Breadcrumb"],
+.centered-container nav[class*="Breadcrumb"] * {
+  font-size: 14px !important;
+}
+
+.centered-container nav[class*="Breadcrumb"] a {
+  color: var(--color-black-90) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 0.1em !important;
+  text-decoration-thickness: 1px !important;
+}
+
+.centered-container nav[class*="Breadcrumb"] a:hover {
+  text-decoration-thickness: 2px !important;
+}
+
+/* Dashboard main content */
+.dashboard-content {
+  flex: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--spacing-xl) 24px var(--spacing-2-xl);
+}
+
+/* Links – musta, Breadcrumb-hover: paksuuntuu eikä väri vaihdu */
+a {
+  color: var(--color-black-90);
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  color: var(--color-black-90);
+  text-decoration-thickness: 2px;
+}
+
+a:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+}
+
+/* Focus näkyy vain näppäimistönavigaatiossa — ei hiirellä avatessa */
+*:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+/* HDS supplementary -napit – musta yhtenäinen värilogiikka */
+button[class*='supplementary'],
+a[class*='supplementary'] {
+  color: var(--color-black-90) !important;
+}
+
+button[class*='supplementary']:hover,
+a[class*='supplementary']:hover {
+  color: var(--color-black-90) !important;
+  background-color: var(--color-black-10) !important;
+}
+
+/* HDS secondary -napit – musta reuna ja teksti (rautalankamalli) */
+button[class*='secondary'],
+a[class*='secondary'] {
+  color: var(--color-black-90) !important;
+  border-color: var(--color-black-90) !important;
+}
+
+button[class*='secondary']:hover,
+a[class*='secondary']:hover {
+  color: var(--color-black-90) !important;
+  border-color: var(--color-black-90) !important;
+  background-color: var(--color-black-10) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: var(--spacing-m) var(--spacing-m) var(--spacing-xl);
+  }
+
+  /* Breadcrumb padding matches dashboard-content on mobile */
+  .centered-container nav[class*="Breadcrumb"] {
+    padding-left: var(--spacing-m) !important;
+    padding-right: var(--spacing-m) !important;
+  }
+
+  h1 {
+    font-size: var(--fontsize-heading-l);
+  }
+
+  h2 {
+    font-size: var(--fontsize-heading-m);
+  }
+}

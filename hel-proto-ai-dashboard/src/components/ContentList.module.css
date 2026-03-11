@@ -1,0 +1,400 @@
+.listHeader {
+  margin-bottom: var(--spacing-s);
+}
+
+.translationNotification {
+  margin-bottom: var(--spacing-m);
+}
+
+.itemCount {
+  font-size: var(--fontsize-heading-m);
+  font-weight: 500;
+  line-height: var(--lineheight-s);
+  color: var(--color-black-90);
+  margin: 0 0 var(--spacing-s) 0;
+}
+
+
+.listTitle {
+  font-size: var(--fontsize-heading-l);
+  font-weight: 400;
+  letter-spacing: -0.4px;
+  line-height: var(--lineheight-s);
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--color-black-90);
+}
+
+.listDescription {
+  font-size: var(--fontsize-body-m);
+  color: var(--color-black-60);
+  margin: 0;
+}
+
+
+/* List */
+.contentList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s); /* 16px */
+}
+
+/* Row */
+.contentRow {
+  background: var(--color-white);
+  border: 1px solid var(--color-black-20);
+  border-left: 4px solid var(--color-black-20); /* aina näkyvä */
+  transition: border-color 0.15s ease;
+}
+
+.contentRow:hover {
+  border-color: var(--color-black-30);
+  border-left-color: var(--color-coat-of-arms);
+}
+
+
+.rowMain {
+  display: grid;
+  grid-template-columns: 1fr auto; /* leftCol | buttonsCol */
+  gap: var(--spacing-m);
+  align-items: center;
+  padding: var(--spacing-m);
+}
+
+/* Vasen sarake: otsikko + meta + kielistatuslabelit */
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.leftCol .langArea {
+  margin-top: var(--spacing-2xs, 8px);
+}
+
+/* Oikea alue: painikkeet vierekkäin, Muokkaa sivua oikeassa reunassa */
+.buttonsCol {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .rowMain {
+    grid-template-columns: 1fr;
+  }
+
+  .buttonsCol {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Mobiililla: languagebadget pysyvät rinnakkain, eivät pinoudu pystyyn */
+  .langArea {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+.contentTitle {
+  font-size: var(--fontsize-body-l);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+  text-decoration-thickness: 1px;
+}
+
+.contentTitle:hover {
+  text-decoration-thickness: 2px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.date {
+  font-size: var(--fontsize-body-s);
+  color: var(--color-black-70);
+}
+
+.dateLabel {
+  color: var(--color-black-50);
+}
+
+.date--old {
+  color: var(--color-black-70);
+}
+
+.outdatedLabel {
+  margin-bottom: 4px;
+  align-self: flex-start;
+}
+
+/* Language status labels — ✅ HDS React: StatusLabel */
+
+/* Tooltip-wrapper: focusoitava, jotta näppäimistöllä toimii */
+.tooltipWrapper {
+  position: relative;
+  display: inline-flex;
+  cursor: default;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-black-90);
+  color: var(--color-white);
+  font-size: var(--fontsize-body-s);
+  line-height: 1.4;
+  padding: 6px 10px;
+  white-space: nowrap;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+}
+
+/* Pieni kolmio-nuoli alaspäin */
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--color-black-90);
+}
+
+.tooltipWrapper:hover .tooltip,
+.tooltipWrapper:focus .tooltip,
+.tooltipWrapper:focus-visible .tooltip {
+  opacity: 1;
+}
+
+/* Focus-rengas wrapperille */
+.tooltipWrapper:focus-visible {
+  outline: 3px solid var(--color-black-90);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.langArea {
+  display: flex;
+  flex-direction: row;  /* desktop + tablet: rinnakkain */
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  align-items: flex-start;
+}
+
+
+
+
+/* AI-huomio-rivi rivin alla */
+.insightChip {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--spacing-2xs, 8px);
+  padding: 0 var(--spacing-m);
+  min-height: 52px;
+  border-top: 1px solid transparent;
+  font-size: var(--fontsize-body-s);
+}
+
+.insightChip--duplicate,
+.insightChip--link {
+  background: var(--color-black-5, #f5f5f5);
+  border-top-color: var(--color-black-20);
+}
+
+.insightIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* Päällekkäinen sisältö: varoitussävy */
+.insightChip--duplicate .insightIcon {
+  color: var(--color-black-70);
+}
+
+/* Linkitysehdotus: informatiivinen sävy */
+.insightChip--link .insightIcon {
+  color: var(--color-coat-of-arms);
+}
+
+.insightText {
+  line-height: var(--lineheight-l);
+  color: var(--color-black-70);
+  min-width: 0;
+}
+
+.insightLabel {
+  font-weight: 700;
+  color: var(--color-black-90);
+}
+
+.insightLink {
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+  text-decoration-thickness: 1px;
+}
+
+.insightLink:hover {
+  text-decoration-thickness: 2px;
+}
+
+
+.insightAction {
+  flex-shrink: 0;
+}
+
+/* Count row: h3 + filter button on same line */
+.countRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-s);
+}
+
+.countRow .itemCount {
+  margin: 0;
+}
+
+/* Filter dropdown */
+.filterDropdown {
+  position: relative;
+}
+
+.filterBtn {
+  white-space: nowrap;
+}
+
+.filterBtn--active {
+  background: var(--color-black-5) !important;
+  outline: 2px solid var(--color-black-90) !important;
+  outline-offset: -2px !important;
+}
+
+.filterChevron {
+  transition: transform 0.15s ease;
+}
+
+.filterChevron--open {
+  transform: rotate(180deg);
+}
+
+.filterMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 220px;
+  background: var(--color-white);
+  border: 1px solid var(--color-black-30);
+  border-radius: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  list-style: none;
+  margin: 0;
+  padding: var(--spacing-2xs, 8px) 0;
+  z-index: 200;
+}
+
+.filterOption {
+  padding: 10px var(--spacing-s);
+  font-size: var(--fontsize-body-m);
+  color: var(--color-black-90);
+  cursor: pointer;
+  outline: none;
+}
+
+.filterOption:hover,
+.filterOption:focus-visible {
+  background: var(--color-black-5);
+}
+
+.filterOption--active {
+  font-weight: 600;
+  background: var(--color-black-5);
+}
+
+/* True empty state — ei yhtään sivua */
+.emptyStateContainer {
+  border: 2px dashed var(--color-black-20);
+  border-radius: 2px;
+  padding: var(--spacing-xl) var(--spacing-m);
+  display: flex;
+  justify-content: center;
+}
+
+.emptyStateInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-s);
+  max-width: 360px;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-black-30);
+}
+
+.emptyStateTitle {
+  font-size: var(--fontsize-heading-s, 20px);
+  font-weight: 500;
+  color: var(--color-black-90);
+  margin: 0;
+}
+
+.emptyStateBody {
+  font-size: var(--fontsize-body-m);
+  color: var(--color-black-60);
+  margin: 0;
+  line-height: var(--lineheight-m, 1.5);
+}
+
+/* Filter empty state */
+.emptyState {
+  font-size: var(--fontsize-body-m);
+  color: var(--color-black-60);
+  padding: var(--spacing-xl) 0;
+  text-align: center;
+}
+
+.emptyStateReset {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: var(--color-coat-of-arms);
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+  cursor: pointer;
+}
+
+.emptyStateReset:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Show more */
+.showMore {
+  margin-top: var(--spacing-l);
+  display: flex;
+  justify-content: center;
+}
+
