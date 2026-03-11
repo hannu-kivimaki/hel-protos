@@ -223,4 +223,29 @@ Kaikki UI-teksti on suomeksi. Ruotsinkieliset käännökset vaaditaan tuotantoon
 
 ---
 
-*Päivitetty: 2026-03-11 (istunto 2)*
+---
+
+## Mobiilikorjaukset
+
+### InsightChip — nappi tekstin alapuolelle (≤576px)
+
+`InsightChip`-komponentissa ("Vertaa sivuja" / "Katso ehdotusperuste") ikoni+teksti ja nappi+dialogi on erotettu omiin wrapper-elementteihin:
+
+```html
+<div class="insightChip">
+  <div class="insightBody">   <!-- ikoni + teksti -->
+  <div class="insightActions"> <!-- nappi + dialogi -->
+```
+
+**Syy:** HDS `Dialog`-komponentti renderöi DOM-elementin myös kiinni-tilassa (`isOpen={false}`). Ilman wrappausta dialogi osallistui flex-layouttiin ylimääräisenä elementtinä napin jälkeen, estäen napin siirtymisen omalle rivilleen.
+
+Mobiilissa (≤576px) `.insightChip` vaihtuu `flex-direction: column`-tilaan ja `.insightActions` sisennetään ikonin leveyden + gapin verran.
+
+### AiInsights-kortit (≤768px)
+
+Korttirivien (`cardInner`) toimintopainikkeet siirtyvät tekstisisällön alapuolelle grid-rivityksen avulla. Lisäksi:
+- `flex-wrap: wrap` painikerivillä kapeiden näkymien varalta
+- `white-space: normal` yhdistäjätekstille ("muistuttaa sivua")
+- `overflow-wrap: anywhere` pitkille sivunimille
+
+*Päivitetty: 2026-03-11 (istunto 3)*
