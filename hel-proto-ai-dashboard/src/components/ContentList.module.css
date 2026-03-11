@@ -262,6 +262,25 @@
   flex-shrink: 0;
 }
 
+@media (max-width: 576px) {
+  .insightChip {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding-top: var(--spacing-s);
+    padding-bottom: var(--spacing-s);
+    min-height: auto;
+  }
+
+  .insightText {
+    flex: 1;
+  }
+
+  .insightAction {
+    flex: 0 0 100%;
+    padding-left: calc(16px + var(--spacing-2xs, 8px)); /* tasataan ikonin jälkeisen tekstin kanssa */
+  }
+}
+
 /* Count row: h3 + filter button on same line */
 .countRow {
   display: flex;
