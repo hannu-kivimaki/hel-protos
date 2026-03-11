@@ -24,13 +24,28 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install sidenavigation dependencies
         working-directory: hel-proto-sidenavigation
         run: npm install --legacy-peer-deps
 
-      - name: Build
+      - name: Build sidenavigation
         working-directory: hel-proto-sidenavigation
         run: npm run build
+
+      - name: Install dashboard dependencies
+        working-directory: hel-proto-ai-dashboard
+        run: npm install --legacy-peer-deps
+
+      - name: Build dashboard
+        working-directory: hel-proto-ai-dashboard
+        run: npm run build
+
+      - name: Combine build outputs
+        run: |
+          mkdir -p combined-dist
+          cp -r hel-proto-sidenavigation/dist/. combined-dist/
+          mkdir -p combined-dist/hel-proto-ai-dashboard
+          cp -r hel-proto-ai-dashboard/dist/. combined-dist/hel-proto-ai-dashboard/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -38,7 +53,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: hel-proto-sidenavigation/dist
+          path: combined-dist
 
   deploy:
     environment:
