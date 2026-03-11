@@ -126,9 +126,18 @@
     grid-column: 1 / -1;
     grid-row: 2;
     display: flex;
+    flex-wrap: wrap;
     gap: var(--spacing-xs);
     padding-top: var(--spacing-s);
     border-top: 1px solid var(--color-black-10);
+  }
+
+  .connector {
+    white-space: normal;
+  }
+
+  .pageLink {
+    overflow-wrap: anywhere;
   }
 }
 
