@@ -276,8 +276,8 @@
   }
 
   .insightAction {
-    flex: 0 0 100%;
-    padding-left: calc(16px + var(--spacing-2xs, 8px)); /* tasataan ikonin jälkeisen tekstin kanssa */
+    flex: 0 0 auto;
+    margin-left: calc(16px + var(--spacing-2xs, 8px)); /* tasataan tekstin kanssa */
   }
 }
 
