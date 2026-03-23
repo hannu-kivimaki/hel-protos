@@ -40,12 +40,22 @@ jobs:
         working-directory: hel-proto-ai-dashboard
         run: npm run build
 
+      - name: Install date-range-picker dependencies
+        working-directory: hel-proto-date-range-picker
+        run: npm install --legacy-peer-deps
+
+      - name: Build date-range-picker
+        working-directory: hel-proto-date-range-picker
+        run: npm run build
+
       - name: Combine build outputs
         run: |
           mkdir -p combined-dist
           cp -r hel-proto-sidenavigation/dist/. combined-dist/
           mkdir -p combined-dist/hel-proto-ai-dashboard
           cp -r hel-proto-ai-dashboard/dist/. combined-dist/hel-proto-ai-dashboard/
+          mkdir -p combined-dist/hel-proto-date-range-picker
+          cp -r hel-proto-date-range-picker/dist/. combined-dist/hel-proto-date-range-picker/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
