@@ -3,7 +3,7 @@ import { DayPicker } from 'react-day-picker';
 import type { DateRange as RdpDateRange } from 'react-day-picker';
 import { format, parse, isValid } from 'date-fns';
 import { fi as fiFns, sv as svFns, enGB as enFns } from 'date-fns/locale';
-import { Button, IconCalendar, IconCheck, IconCross, IconCrossCircle, IconAngleLeft, IconAngleRight } from 'hds-react';
+import { Button, ButtonSize, ButtonVariant, IconCalendar, IconCheck, IconCross, IconCrossCircle, IconAngleLeft, IconAngleRight } from 'hds-react';
 import 'react-day-picker/dist/style.css';
 import './DateRangePicker.css';
 
@@ -452,10 +452,10 @@ export function DateRangePicker({
                 {presetRanges.map((preset, i) => (
                   <Button
                     key={i}
-                    variant="supplementary"
-                    size="small"
+                    variant={ButtonVariant.Supplementary}
+                    size={ButtonSize.Small}
                     onClick={() => handlePreset(preset)}
-                    iconLeft={null as unknown as React.ReactNode}
+                    iconStart={null as unknown as React.ReactNode}
                   >
                     {preset.label}
                   </Button>
@@ -466,18 +466,18 @@ export function DateRangePicker({
             <div className="drp-actions">
               {/* ✅ HDS Core: Button supplementary + IconCross — sama kuin HDS DateInput "Sulje" */}
               <Button
-                variant="supplementary"
-                size="small"
-                iconLeft={<IconCross aria-hidden />}
+                variant={ButtonVariant.Supplementary}
+                size={ButtonSize.Small}
+                iconStart={<IconCross aria-hidden />}
                 onClick={closeDialog}
               >
                 {strings.closeButton}
               </Button>
               {/* ✅ HDS Core: Button secondary + IconCheck — sama kuin HDS DateInput "Valitse" */}
               <Button
-                variant="secondary"
-                size="small"
-                iconLeft={<IconCheck aria-hidden />}
+                variant={ButtonVariant.Secondary}
+                size={ButtonSize.Small}
+                iconStart={<IconCheck aria-hidden />}
                 onClick={handleConfirm}
                 disabled={!canConfirm}
               >

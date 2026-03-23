@@ -10,7 +10,6 @@ import {
   endOfMonth,
   subMonths,
 } from 'date-fns';
-import { Logo } from 'hds-react';
 import { DateRangePicker } from './components/DateRangePicker';
 import type { DateRange, PresetRange } from './components/DateRangePicker';
 
@@ -89,8 +88,7 @@ export default function App() {
       <header className="demo-header">
         <div className="demo-header__inner">
           <div className="demo-header__logo-row">
-            {/* ⚠️ HDS React: Logo */}
-            <Logo color="white" size="medium" />
+            <span className="demo-header__wordmark">Helsinki</span>
           </div>
           <span className="demo-header__badge">Prototyyppi</span>
           <h1 className="demo-header__title">DateRangePicker</h1>
@@ -216,8 +214,7 @@ export default function App() {
 
       <footer className="demo-footer">
         <div className="demo-footer__inner">
-          {/* ⚠️ HDS React: Logo */}
-          <Logo color="black" size="small" />
+          <span className="demo-footer__wordmark">Helsinki</span>
           <p className="demo-footer__text">HDS-prototyyppi · Helsinki Design System · 2025</p>
         </div>
       </footer>
