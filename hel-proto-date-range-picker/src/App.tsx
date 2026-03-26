@@ -11,7 +11,7 @@ import {
   subMonths,
   differenceInDays,
 } from 'date-fns';
-import { Logo, logoFi, logoFiDark } from 'hds-react';
+import { Logo, LogoSize, logoFi, logoFiDark } from 'hds-react';
 import { DateRangePicker } from './components/DateRangePicker';
 import type { DateRange, PresetRange } from './components/DateRangePicker';
 
@@ -95,7 +95,7 @@ export default function App() {
       <header className="demo-header">
         <div className="demo-header__inner">
           <div className="demo-header__logo-row">
-            <Logo src={logoFiDark} size="medium" alt="Helsingin kaupunki" />
+            <Logo src={logoFiDark} size={LogoSize.Medium} alt="Helsingin kaupunki" />
           </div>
           <h1 className="demo-header__title">DateRangePicker</h1>
           <p className="demo-header__desc">
@@ -266,7 +266,7 @@ export default function App() {
 
       <footer className="demo-footer">
         <div className="demo-footer__inner">
-          <Logo src={logoFi} size="small" alt="Helsingin kaupunki" />
+          <Logo src={logoFi} size={LogoSize.Small} alt="Helsingin kaupunki" />
           <p className="demo-footer__text">Helsinki Design System · Prototyyppi · 2026</p>
         </div>
       </footer>
