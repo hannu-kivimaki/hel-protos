@@ -4,8 +4,9 @@
    Kaikki värit ja spacingit HDS design tokeneista.
    ============================================================ */
 
-/* Visually hidden live region */
-.drp-announce {
+/* Visually hidden — live region ja sr-only labelit */
+.drp-announce,
+.drp-sr-only {
   position: absolute;
   width: 1px;
   height: 1px;

@@ -71,6 +71,7 @@ const t = {
     startPlaceholder: 'pp.kk.vvvv',
     endPlaceholder: 'pp.kk.vvvv',
     openButton: 'Avaa kalenteri',
+    closeCalendarButton: 'Sulje kalenteri',
     dialogLabel: 'Päivämäärävälin valitsin',
     phaseStart: 'Valitse alkupäivä',
     phaseEnd: 'Valitse loppupäivä',
@@ -96,6 +97,7 @@ const t = {
     startPlaceholder: 'dd.mm.åååå',
     endPlaceholder: 'dd.mm.åååå',
     openButton: 'Öppna kalender',
+    closeCalendarButton: 'Stäng kalender',
     dialogLabel: 'Datumintervallväljare',
     phaseStart: 'Välj startdatum',
     phaseEnd: 'Välj slutdatum',
@@ -121,6 +123,7 @@ const t = {
     startPlaceholder: 'dd.mm.yyyy',
     endPlaceholder: 'dd.mm.yyyy',
     openButton: 'Open calendar',
+    closeCalendarButton: 'Close calendar',
     dialogLabel: 'Date range picker',
     phaseStart: 'Select start date',
     phaseEnd: 'Select end date',
@@ -514,6 +517,15 @@ export function DateRangePicker({
     [currentMonth]
   );
 
+  const isPresetActive = (preset: PresetRange): boolean => {
+    if (!pendingRange?.from || !pendingRange?.to) return false;
+    const { startDate, endDate } = preset.getRange();
+    return (
+      format(pendingRange.from, DATE_FORMAT) === format(startDate, DATE_FORMAT) &&
+      format(pendingRange.to, DATE_FORMAT) === format(endDate, DATE_FORMAT)
+    );
+  };
+
   const canConfirm = !!(pendingRange?.from && pendingRange?.to);
   const isInvalid = !!errorText;
   const formatHintId = `${id}-format`;
@@ -559,13 +571,13 @@ export function DateRangePicker({
           role="group"
           aria-labelledby={`${id}-label`}
         >
+          <label htmlFor={`${id}-start`} className="drp-sr-only">{strings.startLabel}</label>
           <input
             ref={startInputRef}
             id={`${id}-start`}
             type="text"
             inputMode="text"
             className="drp-input"
-            aria-label={strings.startLabel}
             aria-describedby={describedBy}
             aria-invalid={isInvalid || undefined}
             aria-required={required || undefined}
@@ -578,13 +590,14 @@ export function DateRangePicker({
           <span className="drp-separator" aria-hidden="true">
             {strings.separator}
           </span>
+          <label htmlFor={`${id}-end`} className="drp-sr-only">{strings.endLabel}</label>
           <input
             ref={endInputRef}
             id={`${id}-end`}
             type="text"
             inputMode="text"
             className="drp-input"
-            aria-label={strings.endLabel}
+            aria-describedby={describedBy}
             aria-invalid={isInvalid || undefined}
             aria-required={required || undefined}
             value={endInputValue}
@@ -621,7 +634,7 @@ export function DateRangePicker({
             ref={calendarButtonRef}
             type="button"
             className="drp-calendar-btn"
-            aria-label={strings.openButton}
+            aria-label={isOpen ? strings.closeCalendarButton : strings.openButton}
             aria-haspopup="dialog"
             aria-expanded={isOpen}
             aria-controls={dialogId}
@@ -677,6 +690,7 @@ export function DateRangePicker({
                       variant={ButtonVariant.Secondary}
                       size={ButtonSize.Small}
                       onClick={() => handlePreset(preset)}
+                      aria-pressed={isPresetActive(preset)}
                     >
                       {preset.label}
                     </Button>
@@ -712,7 +726,7 @@ export function DateRangePicker({
             </div>
 
             {/* Valintasummary — navin alla, lähempänä kalenteria */}
-            <div className="drp-phase-label" aria-live="polite" aria-atomic="true">
+            <div className="drp-phase-label" aria-hidden="true">
               {getPhaseLabel(pendingRange, strings.selectionLabel, strings.phaseStart)}
             </div>
 
