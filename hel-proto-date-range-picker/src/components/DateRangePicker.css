@@ -17,19 +17,21 @@
   border: 0;
 }
 
-/* Root container — position: relative for dialog anchoring */
+/* Root container */
 .drp-root {
-  position: relative;
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
-  gap: var(--spacing-2-xs, 4px);
   width: 100%;
-  /* ~2× HDS DateInput (~200px each) + separator + calendar button */
   max-width: 400px;
 }
 
-/* ---- Label — HDS FieldLabel/TextInput -tyyli ---- */
-/* font-size: var(--fontsize-body-m) = 1rem, font-weight: 500, margin-bottom: --spacing-3-xs (0.25rem) */
+/* Input wrapper — position: relative for dialog anchoring */
+.drp-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ---- Label ---- */
 .drp-label {
   display: block;
   font-family: HelsinkiGrotesk, Arial, sans-serif;
@@ -37,41 +39,42 @@
   font-weight: 500;
   line-height: var(--lineheight-m, 1.2);
   color: var(--color-black-90, #1a1a1a);
-  margin-bottom: var(--spacing-3-xs, 0.25rem);
+  margin-bottom: var(--spacing-3-xs, 4px);
 }
 
 .drp-label__required {
   color: var(--color-error, #c4123e);
 }
 
-/* ---- Input group — yhdistetty kenttä, HDS TextInput -tyylin mukainen ---- */
+/* ---- Input group ---- */
 .drp-input-group {
   display: flex;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
   border: 2px solid var(--color-black-60, #666);
   background-color: #fff;
   height: 56px;
   padding: 0 0 0 var(--spacing-s, 16px);
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, outline-color 0.15s ease;
 }
 
 .drp-input-group:hover:not(.drp-input-group--disabled) {
   border-color: var(--color-black-90, #1a1a1a);
 }
 
-.drp-input-group:focus-within:not(.drp-input-group--invalid) {
-  border-color: var(--color-coat-of-arms, #0000bf);
+.drp-input-group:focus-within:not(.drp-input-group--invalid):not(:has(.drp-calendar-btn:focus-visible)) {
   outline: 3px solid var(--color-coat-of-arms, #0000bf);
-  outline-offset: -3px;
+  outline-offset: 2px;
 }
 
 .drp-input-group--invalid {
   border-color: var(--color-error, #c4123e);
 }
 
-.drp-input-group--invalid:focus-within {
+.drp-input-group--invalid:focus-within:not(:has(.drp-calendar-btn:focus-visible)) {
   outline: 3px solid var(--color-error, #c4123e);
-  outline-offset: -3px;
+  outline-offset: 2px;
 }
 
 .drp-input-group--disabled {
@@ -80,27 +83,23 @@
   cursor: not-allowed;
 }
 
-/* ---- Yksittäiset tekstisyötteet ---- */
+/* ---- Tekstisyötteet ---- */
 .drp-input {
   flex: 1;
   border: none;
   outline: none;
   background: transparent;
   font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: var(--fontsize-body-m, 16px);
+  font-size: var(--fontsize-body-l, 18px);
   color: var(--color-black-90, #1a1a1a);
   min-width: 0;
   padding: 0;
 }
 
-/* Alkupäivä oikealle tasattuna — teksti ja placeholder asettuvat kiinni
-   em-viivaan, jolloin välit ovat symmetriset molemmilla puolilla viivaa */
 .drp-input-group .drp-input:first-child {
   text-align: right;
 }
 
-/* Kun tyhjennä-painike on näkyvissä, loppupäivä-inputin oikea reuna saa
-   pienen lisäpaddingin — estää tekstiä ahtautumasta painikkeen alle */
 .drp-input-group:has(.drp-clear-btn) .drp-input:last-of-type {
   padding-right: var(--spacing-2-xs, 4px);
 }
@@ -120,14 +119,11 @@
   padding: 0 var(--spacing-2-xs, 4px);
   color: var(--color-black-60, #666);
   font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: var(--fontsize-body-m, 16px);
+  font-size: var(--fontsize-body-l, 18px);
   user-select: none;
 }
 
-/* ---- Tyhjennä-painike — HDS TextInput clear-pattern ----
-   HDS: ei reunaviivaa, ei hover-taustaväriä, pelkkä ikoni padding-kehyksellä.
-   Padding: --spacing-xs ylä/ala, puolet siitä vasemmalle/oikealle (12px / 6px).
-   Ikoni: 24px (--spacing-m), sama kuin HDS:n icon-size. */
+/* ---- Tyhjennä-painike ---- */
 .drp-clear-btn {
   display: flex;
   align-items: center;
@@ -151,7 +147,7 @@
   display: block;
 }
 
-/* ---- Kalenteripainike — HDS DateInput -tyylinen ---- */
+/* ---- Kalenteripainike ---- */
 .drp-calendar-btn {
   display: flex;
   align-items: center;
@@ -172,9 +168,9 @@
 }
 
 .drp-calendar-btn:focus-visible {
-  /* HDS DateInput -tyylin mukainen focus: box-shadow, ei outline */
-  box-shadow: 0 0 0 3px var(--color-coat-of-arms, #0000bf);
-  outline: none;
+  outline: 3px solid var(--color-coat-of-arms, #0000bf);
+  outline-offset: -2px;
+  box-shadow: none;
 }
 
 .drp-calendar-btn:disabled {
@@ -182,25 +178,46 @@
   cursor: not-allowed;
 }
 
-/* ---- Aputeksti ja virheteksti ---- */
+/* ---- Aputeksti — vastaa .hds-text-input__helper-text ---- */
 .drp-helper-text {
-  margin: 0;
+  margin-top: var(--spacing-3-xs, 4px);
+  margin-bottom: 0;
   font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: var(--fontsize-body-s, 14px);
-  color: var(--color-black-70, #4d4d4d);
-  line-height: var(--lineheight-m, 1.2);
+  font-size: var(--fontsize-body-m, 16px);
+  color: var(--color-black-60, #666);
+  line-height: var(--lineheight-l, 1.5);
+  white-space: pre-line;
 }
 
 .drp-error-text {
-  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3-xs, 4px);
+  margin-top: var(--spacing-3-xs, 4px);
+  margin-bottom: 0;
+  padding: var(--spacing-xs, 12px) var(--spacing-s, 16px) var(--spacing-xs, 12px) var(--spacing-2-xs, 8px);
+  background-color: #f9e0e6;
+  border-left: 8px solid var(--color-error, #c4123e);
   font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: var(--fontsize-body-s, 14px);
+  font-size: var(--fontsize-body-m, 16px);
+  font-weight: 400;
+  color: var(--color-black-90, #1a1a1a);
+  line-height: var(--lineheight-l, 1.5);
+}
+
+.drp-error-icon {
+  flex-shrink: 0;
+  width: var(--fontsize-body-m, 16px);
+  height: var(--fontsize-body-m, 16px);
   color: var(--color-error, #c4123e);
-  line-height: var(--lineheight-m, 1.2);
+}
+
+.drp-error-text + .drp-helper-text {
+  margin-top: var(--spacing-2-xs, 8px);
 }
 
 /* ============================================================
-   Dialog — sijoittuu syötekentän alle
+   Dialog
    ============================================================ */
 
 .drp-dialog {
@@ -209,14 +226,24 @@
   left: 0;
   z-index: 100;
   background: #fff;
-  /* HDS DateInput box-shadow: 0 2px 4px 0 rgba(0,0,0,.5) */
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  min-width: 680px;
+  width: max-content;
 }
 
-/* ---- Footer: pikavalinnat + toimintopainikkeet ---- */
+/* ---- Vaiheistusteksti (kalenterin sisällä, navin alla) ---- */
+.drp-phase-label {
+  margin-top: var(--spacing-s, 16px);
+  margin-bottom: var(--spacing-s, 16px);
+  text-align: center;
+  font-family: HelsinkiGrotesk, Arial, sans-serif;
+  font-size: var(--fontsize-body-m, 16px);
+  font-weight: 400;
+  color: var(--color-black-90, #1a1a1a);
+}
+
+/* ---- Footer ---- */
 .drp-footer {
   display: flex;
   flex-direction: column;
@@ -225,27 +252,52 @@
   border-top: 1px solid var(--color-black-20, #d9d9d9);
 }
 
+/* column-suunta estää otsikon ja nappirivin summaantumisen max-content-laskennassa,
+   jolloin dialog-leveyden määrää DayPicker eikä otsikko+napit rinnakkain */
 .drp-presets {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--spacing-xs, 12px);
 }
 
-/* Toimintopainikkeet — HDS DateInput: justify-content: center */
+/* Kalenterin yläpuolella — sekä mobiili että desktop */
+.drp-presets--top {
+  padding: 0 0 var(--spacing-s, 16px);
+  border-bottom: 1px solid var(--color-black-20, #d9d9d9);
+  margin-bottom: 0;
+}
+
+.drp-presets__label {
+  margin: 0;
+  font-family: HelsinkiGrotesk, Arial, sans-serif;
+  font-size: var(--fontsize-body-xl, 20px);
+  font-weight: 700;
+  color: var(--color-black-90, #1a1a1a);
+  text-align: left;
+}
+
+/* Desktop: nappit rivissä, jaetaan tyhjä tila nappien väleihin ilman koon muutosta */
+.drp-presets__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  justify-content: space-between;
+}
+
 .drp-actions {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
+  justify-content: flex-start;
   gap: var(--spacing-s, 16px);
 }
 
+/* Wrapper-divit ovat flex-lapsia — order ohjaa visuaalista järjestystä.
+   Vahvista (primary) aina vasemmalla, Sulje oikealla. */
+.drp-action-confirm { order: 0; }
+.drp-action-close   { order: 1; }
+
 /* ============================================================
    react-day-picker — HDS DateInput -tyylinen ulkoasu
-   Kaikki säännöt rajoitettu .drp-calendar-luokan alle.
-
-   Fonttikoot vastaavat HDS DateInput -komponenttia (hds-react 3.11):
-   - Kuukausiotsikko: --fontsize-body-xl (1.25rem / 20px), font-weight 700
-   - Viikonpäivät:   --fontsize-body-m  (1rem / 16px),    font-weight 700, uppercase
-   - Päivänumerot:   --fontsize-body-m  (1rem / 16px)
    ============================================================ */
 
 .drp-calendar {
@@ -253,37 +305,19 @@
   box-sizing: border-box;
 }
 
-/* Root */
-.drp-calendar .rdp {
-  margin: 0;
-  --rdp-cell-size: 40px;
-  --rdp-accent-color: var(--color-bus, #0000bf);
-  --rdp-background-color: rgba(0, 0, 191, 0.1);
-  /* Suppress rdp's own outline-based focus ring — we use box-shadow instead */
-  --rdp-outline: none;
-  --rdp-outline-selected: none;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: var(--fontsize-body-m, 16px);
-  color: var(--color-black-90, #1a1a1a);
-}
-
-/* Kuukaudet rinnakkain desktopissa */
-.drp-calendar .rdp-months {
-  display: flex;
-  gap: var(--spacing-l, 32px);
-}
-
-/* Otsikkorivi (kuukausi + vuosi) — HDS DateInput: font-size xl, bold, capitalize */
-.drp-calendar .rdp-caption {
+/* ---- Nav-rivi: [←] [Maaliskuu–Huhtikuu 2026] [→] ---- */
+.drp-calendar-nav-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: var(--spacing-m, 24px);
   margin-bottom: var(--spacing-xs, 12px);
 }
 
-.drp-calendar .rdp-caption_label {
+/* ---- Kombinoitu kuukausiotsikko ---- */
+.drp-calendar-header {
   flex: 1;
-  justify-content: center; /* centers text inside the inline-flex label */
+  text-align: center;
   font-family: HelsinkiGrotesk, Arial, sans-serif;
   font-size: var(--fontsize-body-xl, 20px);
   font-weight: 700;
@@ -292,33 +326,13 @@
   text-transform: capitalize;
 }
 
-/* Multi-month: rdp positions nav absolutely (left:0 / right:0) which overlaps the
-   centered month label. Override to in-flow flex items instead. */
-.drp-calendar .rdp-multiple_months .rdp-caption_start .rdp-nav,
-.drp-calendar .rdp-multiple_months .rdp-caption_end .rdp-nav {
-  position: static;
-  top: auto;
-  left: auto;
-  right: auto;
-  transform: none;
-}
 
-/* caption_start: DOM order is [label][nav], but prev button belongs on the LEFT */
-.drp-calendar .rdp-multiple_months .rdp-caption_start .rdp-nav {
-  order: -1;
-}
-
-/* Navigointipainikkeet — HDS DateInput: ~25px, no border, box-shadow focus */
-.drp-calendar .rdp-nav {
-  display: flex;
-  gap: 2px;
-}
-
-.drp-calendar .rdp-nav_button {
+/* ---- Navigointipainikkeet ---- */
+.drp-nav-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 32px button accommodates 24px HDS icon with comfortable padding */
+  flex-shrink: 0;
   width: 32px;
   height: 32px;
   border: none;
@@ -329,26 +343,98 @@
   transition: background-color 0.1s ease;
 }
 
-.drp-calendar .rdp-nav_button:hover {
+.drp-nav-btn:hover {
   background-color: var(--color-black-10, #e6e6e6);
 }
 
-.drp-calendar .rdp-nav_button:focus {
-  /* HDS DateInput: box-shadow, ei outline. border-radius: 0 → nelikulmainen focus. */
+.drp-nav-btn:focus {
   box-shadow: 0 0 0 3px var(--color-coat-of-arms, #0000bf);
   outline: none;
   border-radius: 0;
 }
 
-/* HDS IconAngleLeft/Right — 24px matches HDS DateInput icon content area */
-.drp-calendar .rdp-nav_button svg {
+.drp-nav-btn svg {
   width: 24px;
   height: 24px;
   display: block;
   flex-shrink: 0;
 }
 
-/* Viikonpäiväotsikot — HDS DateInput: bold, uppercase */
+/* ---- Kuukausien siirtymäanimaatio ---- */
+@keyframes slideInForward {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInBack {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.drp-months-anim--forward {
+  animation: slideInForward 200ms ease-out both;
+}
+
+.drp-months-anim--back {
+  animation: slideInBack 200ms ease-out both;
+}
+
+/* Root */
+.drp-calendar .rdp {
+  margin: 0;
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: var(--color-bus, #0000bf);
+  --rdp-background-color: rgba(0, 0, 191, 0.1);
+  --rdp-outline: none;
+  --rdp-outline-selected: none;
+  font-family: HelsinkiGrotesk, Arial, sans-serif;
+  font-size: var(--fontsize-body-m, 16px);
+  color: var(--color-black-90, #1a1a1a);
+}
+
+/* Piilota rdp:n omat navigointipainikkeet — käytetään omia */
+.drp-calendar .rdp-nav {
+  display: none;
+}
+
+/* Kuukaudet rinnakkain — ei gap, pystyviiva erottaa */
+.drp-calendar .rdp-months {
+  display: flex;
+  gap: 0;
+}
+
+/* Nollataan rdp:n oletusmarginaalit — symmetrian hallinta omilla arvoilla */
+.drp-calendar .rdp-months .rdp-month {
+  margin: 0;
+  padding: 0;
+}
+
+/* Pystyviiva ensimmäisen kuukauden jälkeen */
+.drp-calendar .rdp-months .rdp-month:first-child {
+  border-right: 1px solid var(--color-black-20, #d9d9d9);
+  padding-right: 8px;
+  margin-right: 8px;
+}
+
+/* Otsikkorivi — caption piilossa, rdp:n yksilölliset kuukausinimet jäävät ruudunlukijoille */
+.drp-calendar .rdp-caption {
+  margin: 0;
+}
+
+/* Caption-label visuaalisesti piilotettu — kombinoitu otsikko hoitaa visuaalisen puolen */
+.drp-calendar .rdp-caption_label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Viikonpäiväotsikot */
 .drp-calendar .rdp-head_cell {
   font-family: HelsinkiGrotesk, Arial, sans-serif;
   font-size: var(--fontsize-body-m, 16px);
@@ -369,7 +455,7 @@
   line-height: 0;
 }
 
-/* Päiväpainike — HDS DateInput: square, no border-radius */
+/* Päiväpainike */
 .drp-calendar .rdp-day {
   width: 34px;
   height: 34px;
@@ -393,11 +479,6 @@
   background-color: var(--color-black-10, #e6e6e6);
 }
 
-/* HDS DateInput focus ring: 2px white gap + 3px colored ring (= 5px total spread).
-   HDS achieves the gap structurally via an inner wrapper with inset: 2px; we
-   replicate it with a two-layer box-shadow.
-   Use both :focus (mouse + keyboard) and :focus-visible (keyboard) to override
-   any rdp-native focus styles that target :focus-visible specifically. */
 .drp-calendar .rdp-day:focus,
 .drp-calendar .rdp-day:focus-visible {
   box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-coat-of-arms, #0000bf);
@@ -406,13 +487,11 @@
   position: relative;
 }
 
-/* Tänään — HDS DateInput: ::after pseudo-element, 2px underline alhaalla */
-/* Bold weight for unselected today */
+/* Tänään */
 .drp-calendar .rdp-day_today:not(.rdp-day_range_start):not(.rdp-day_range_end) {
   font-weight: 700;
 }
 
-/* Black underline when today is unselected or in range middle */
 .drp-calendar .rdp-day_today:not(.rdp-day_range_start):not(.rdp-day_range_end)::after {
   content: '';
   position: absolute;
@@ -423,7 +502,6 @@
   background: var(--color-black-90, #1a1a1a);
 }
 
-/* White underline when today is the range start or end (dark background) */
 .drp-calendar .rdp-day_today.rdp-day_range_start::after,
 .drp-calendar .rdp-day_today.rdp-day_range_end::after {
   content: '';
@@ -450,31 +528,25 @@
 
 /* ---- Range-tyylit ---- */
 
-/* Valittu alkupäivä ja loppupäivä — HDS DateInput: var(--color-bus) tausta, neliöinen */
-.drp-calendar .rdp-day_range_start,
-.drp-calendar .rdp-day_range_end {
+/* Kaksoisluokka varmistaa oikean spesifisyyden — valkoinen teksti sinisellä/mustalla */
+.drp-calendar .rdp-day.rdp-day_range_start,
+.drp-calendar .rdp-day.rdp-day_range_end {
   background-color: var(--color-bus, #0000bf);
   color: #fff;
   font-weight: 700;
   border-radius: 0;
 }
 
-.drp-calendar .rdp-day_range_start:hover,
-.drp-calendar .rdp-day_range_end:hover {
+.drp-calendar .rdp-day.rdp-day_range_start:hover,
+.drp-calendar .rdp-day.rdp-day_range_end:hover {
   background-color: var(--color-bus, #0000bf);
 }
 
-/* Yksittäinen päivä kun alku === loppu */
-.drp-calendar .rdp-day_range_start.rdp-day_range_end {
+.drp-calendar .rdp-day.rdp-day_range_start.rdp-day_range_end {
   background-color: var(--color-bus, #0000bf);
 }
 
-/* Range-highlight: background-size constrains the light strip to exactly the
-   day button height (34px), matching the solid blue rectangle.
-   Cell = 40px, button = 34px, cell padding = 3px — background-position: center
-   vertically centres the 34px strip within the 40px cell (3px gap top + bottom). */
-
-/* Välin keskipäivät: täysilevyinen, 34px korkuinen korostus */
+/* Välin keskipäivät */
 .drp-calendar .rdp-cell:has(.rdp-day_range_middle) {
   background-image: linear-gradient(
     var(--drp-range-bg, var(--color-bus-light, #f0f0ff)),
@@ -485,7 +557,6 @@
   background-repeat: no-repeat;
 }
 
-/* Alkupäivästä oikealle ulottuva tausta — oikea puoli, 34px korkuinen */
 .drp-calendar .rdp-cell:has(.rdp-day_range_start):not(:has(.rdp-day_range_end)) {
   background-image: linear-gradient(
     var(--drp-range-bg, var(--color-bus-light, #f0f0ff)),
@@ -496,7 +567,6 @@
   background-repeat: no-repeat;
 }
 
-/* Loppupäivästä vasemmalle ulottuva tausta — vasen puoli, 34px korkuinen */
 .drp-calendar .rdp-cell:has(.rdp-day_range_end):not(:has(.rdp-day_range_start)) {
   background-image: linear-gradient(
     var(--drp-range-bg, var(--color-bus-light, #f0f0ff)),
@@ -507,7 +577,6 @@
   background-repeat: no-repeat;
 }
 
-/* Välin keskipäivän painike — läpinäkyvä, ei pyöristystä */
 .drp-calendar .rdp-day_range_middle {
   background: transparent;
   color: var(--color-black-90, #1a1a1a);
@@ -522,114 +591,205 @@
    Väriteemat
    ============================================================ */
 
-/* Bus-teema (oletus): bus-light (#f0f0ff), coat-of-arms sininen aksentti */
 .drp-dialog--bus {
   --drp-range-bg: var(--color-bus-light, #f0f0ff);
+  --drp-range-bg-0: rgba(240, 240, 255, 0); /* bus-light alpha=0 — gradient-häipymistä varten */
 }
 
-/* ---- Black-teema (hel.fi) ---- */
-/* Range-taustaväri: black-10 (#e6e6e6) */
 .drp-dialog--black {
   --drp-range-bg: var(--color-black-10, #e6e6e6);
+  --drp-range-bg-0: rgba(230, 230, 230, 0); /* black-10 alpha=0 — gradient-häipymistä varten */
 }
 
-/* Black-teema: syötekentän focus musta eikä sininen */
-.drp-root--black .drp-input-group:focus-within:not(.drp-input-group--invalid) {
-  border-color: var(--color-black-90, #1a1a1a);
+.drp-root--black .drp-input-group:focus-within:not(.drp-input-group--invalid):not(:has(.drp-calendar-btn:focus-visible)) {
   outline-color: var(--color-black-90, #1a1a1a);
 }
 
-/* Black-teema: tyhjennä- ja kalenteripainikkeen focus musta */
 .drp-root--black .drp-clear-btn:focus-visible {
   box-shadow: 0 0 0 3px var(--color-black-90, #1a1a1a);
 }
 
 .drp-root--black .drp-calendar-btn:focus-visible {
+  outline-color: var(--color-black-90, #1a1a1a);
+}
+
+/* Black-teema: omat navigointipainikkeet */
+.drp-root--black .drp-nav-btn:focus {
   box-shadow: 0 0 0 3px var(--color-black-90, #1a1a1a);
 }
 
-/* Black-teema: navigointipainikkeiden focus musta, nelikulmainen */
-.drp-root--black .drp-calendar .rdp-nav_button:focus {
-  box-shadow: 0 0 0 3px var(--color-black-90, #1a1a1a);
-  border-radius: 0;
+/* Black-teema: HDS Button -fokusrengas (pikavalinnat + action-napit) */
+.drp-root--black .drp-presets__buttons button:focus-visible,
+.drp-root--black .drp-action-confirm button:focus-visible,
+.drp-root--black .drp-action-close button:focus-visible {
+  outline-color: var(--color-black-90, #1a1a1a) !important;
 }
 
-/* Black-teema: päiväpainikkeiden focus musta, sama 2px offset */
+
+/* Black-teema: päiväpainikkeiden focus */
 .drp-root--black .drp-calendar .rdp-day:focus,
 .drp-root--black .drp-calendar .rdp-day:focus-visible {
   box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-black-90, #1a1a1a);
 }
 
-/* Black-teema: valitut päivät (alku + loppu) mustalla eikä bus-sinisellä */
-.drp-root--black .drp-calendar .rdp-day_range_start,
-.drp-root--black .drp-calendar .rdp-day_range_end {
+/* Black-teema: rdp:n oma accent-väri (sininen) ylikirjoitetaan — estää sinisävyisen
+   taustan kun fokus on valitsemattomalla päivällä (mm. tänään-solu). */
+.drp-root--black .drp-calendar .rdp-day:focus:not(.rdp-day_range_start):not(.rdp-day_range_end),
+.drp-root--black .drp-calendar .rdp-day:focus-visible:not(.rdp-day_range_start):not(.rdp-day_range_end) {
+  background-color: var(--color-black-10, #e6e6e6) !important;
+}
+
+/* Black-teema: valitut päivät mustalla */
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_start,
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_end {
   background-color: var(--color-black-90, #1a1a1a);
   color: #fff;
 }
 
-.drp-root--black .drp-calendar .rdp-day_range_start:hover,
-.drp-root--black .drp-calendar .rdp-day_range_end:hover {
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_start:hover,
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_end:hover {
   background-color: var(--color-black-90, #1a1a1a);
 }
 
-.drp-root--black .drp-calendar .rdp-day_range_start.rdp-day_range_end {
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_start.rdp-day_range_end {
   background-color: var(--color-black-90, #1a1a1a);
 }
 
-/* Black-teema: välin hover tummempi harmaa */
 .drp-root--black .drp-calendar .rdp-day_range_middle:hover {
   background-color: rgba(0, 0, 0, 0.12);
 }
 
-/* Black-teema: HDS Button CSS-muuttujat (cascade root-elementille)
-   HDS Button käyttää --color, --border-color, --background-color-hover CSS-muuttujia.
-   Asettamalla ne .drp-footer button -tasolla ne peittävät HDS:n oletusväriteeman. */
+/* Black-teema: HDS Button CSS-muuttujat
+   HDS 5.0 käyttää CSS Modules -luokkia "Button-module_primary__*" ja "Button-module_secondary__*".
+   [class*="Button-module_primary"] osuu näihin luokkiin riippumatta hash-suffiksista. */
 
-/* Kaikki footer-painikkeet: teksti ja ikoni mustalla, hover black-5 (#f2f2f2) */
-.drp-root--black .drp-footer button {
-  --color: var(--color-black-90, #1a1a1a);
-  --color-hover: var(--color-black-90, #1a1a1a);
-  --background-color-hover: var(--color-black-5, #f2f2f2);
+/* Ensisijainen painike (Vahvista) — musta täyttö, valkoinen teksti */
+.drp-root--black [class*="Button-module_primary"] {
+  --background-color: #000;
+  --background-color-hover: rgba(0, 0, 0, 0.8);
+  --background-color-focus: #000;
+  --border-color: #000;
+  --color: #fff;
+  --color-hover: #fff;
+  --color-focus: #fff;
 }
 
-/* Secondary-variantti (Valitse) — mustat reunat, hover: 5% läpinäkyvä musta */
-/* :last-of-type koska Valitse on actions-ryhmän toinen painike */
-.drp-root--black .drp-actions button:last-of-type {
-  --border-color: var(--color-black-90, #1a1a1a);
+/* Toissijainen painike (Sulje, pikavalinnat) — läpinäkyvä, musta reunaviiva */
+.drp-root--black [class*="Button-module_secondary"] {
+  --background-color: transparent;
   --background-color-hover: rgba(0, 0, 0, 0.05);
-  --color-hover: var(--color-black-90, #1a1a1a);
+  --background-color-focus: transparent;
+  --border-color: #000;
+  --border-color-hover: #000;
+  --border-color-focus: #000;
+  --color: #000;
+  --color-hover: #000;
+  --color-focus: #000;
 }
 
 /* ============================================================
-   Mobiili — kuukaudet allekkain, dialog koko ruutu
+   Range overflow -indikaattorit (mobiili, 1 kuukausi kerrallaan)
+   Gradient täsmää range-palkin korkeuteen (34px) ja pystyasemointiin (3px padding).
+   Suunta: vahva range-väri vasemmalla → häipyy oikealle, jatkumisen vaikutelma.
+   ============================================================ */
+
+.drp-months-anim {
+  position: relative;
+}
+
+/* Range jatkuu seuraavaan kuukauteen:
+   Hard-step range-bg-väri viimeisen valitun päivän kohdalla → häipyy valkoiseen.
+   --drp-range-bg-0 = sama väri alpha=0, jotta häipyminen pysyy oikeassa sävyssä. */
+.drp-calendar--overflow-end .drp-months-anim::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  right: 0;
+  height: 34px;
+  background: linear-gradient(
+    to right,
+    transparent var(--drp-overflow-end-x, 28%),
+    var(--drp-range-bg, #f0f0ff) var(--drp-overflow-end-x, 28%),
+    var(--drp-range-bg-0, rgba(240, 240, 255, 0)) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Range alkoi edellisessä kuussa:
+   Häipyy valkoisesta range-bg-väriksi ensimmäisen päivän kohdalla — peilikuva overflow-endistä.
+   Tyhjät solut vasemmalla saavat kasvavan range-värin kohti ensimmäistä valittua päivää. */
+.drp-calendar--overflow-start .drp-months-anim::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--rdp-cell-size, 44px) + 3px);
+  left: 0;
+  right: 0;
+  height: 34px;
+  background: linear-gradient(
+    to right,
+    var(--drp-range-bg-0, rgba(240, 240, 255, 0)) 0%,
+    var(--drp-range-bg, #f0f0ff) var(--drp-overflow-start-x, 28%),
+    transparent var(--drp-overflow-start-x, 28%)
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ============================================================
+   Mobiili
    ============================================================ */
 
 @media (max-width: 767px) {
+  /* Komponentti täyttää kontin leveyden */
   .drp-root {
     max-width: 100%;
   }
 
+  /* Dialogi peittää koko ruudun — 1 kuukausi kerrallaan, skrollataan jos presetit vievät tilaa */
   .drp-dialog {
     position: fixed;
     inset: 0;
-    min-width: unset;
     width: 100%;
     height: 100%;
     overflow-y: auto;
+    overscroll-behavior: contain;
     box-shadow: none;
     display: flex;
     flex-direction: column;
   }
 
-  .drp-calendar .rdp-months {
-    flex-direction: column;
-    gap: var(--spacing-m, 24px);
-  }
-
+  /* Kalenteri kasvaa täyttämään tilan ennen footeria */
   .drp-calendar {
     flex: 1;
   }
 
+
+  /* Fluid cell size — min(44px, käytettävissä oleva tila / 7 päivää)
+     320px: (320−32)/7 ≈ 41px, suuremmat ruudut lähestyvät 44px */
+  .drp-calendar .rdp {
+    --rdp-cell-size: min(44px, calc((100vw - 32px) / 7));
+  }
+
+  /* Kalenteritaulukko täyttää käytettävissä olevan leveyden */
+  .drp-calendar .rdp-table {
+    width: 100%;
+  }
+
+  /* Keskitä kalenteri mobiilissa */
+  .drp-calendar .rdp-months {
+    justify-content: center;
+  }
+
+  /* Kuukauden divider ei tarpeen mobiilissa (1 kuukausi kerrallaan) */
+  .drp-calendar .rdp-months .rdp-month:first-child {
+    border-right: none;
+    padding-right: 0;
+    margin-right: 0;
+  }
+
+  /* Footer pysyy ruudun alaosassa */
   .drp-footer {
     position: sticky;
     bottom: 0;
@@ -637,13 +797,86 @@
     border-top: 2px solid var(--color-black-20, #d9d9d9);
   }
 
+  /* Toimintopainikkeet pinokkain, täysleveys — order-ominaisuus hoitaa järjestyksen */
   .drp-actions {
-    flex-direction: column-reverse;
+    flex-direction: column;
     gap: var(--spacing-xs, 12px);
   }
 
-  .drp-actions button {
+  .drp-action-confirm,
+  .drp-action-close {
+    width: 100%;
+  }
+
+  .drp-action-confirm button,
+  .drp-action-close button {
     width: 100%;
     justify-content: center;
+  }
+
+  /* Preset-ruudukko täysleveys — 2-kolumni grid mobiilissa */
+  .drp-presets__buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2-xs, 4px);
+    width: 100%;
+    justify-content: initial;
+  }
+
+  .drp-presets__buttons > * {
+    width: 100%;
+  }
+
+  .drp-presets--top {
+    width: 100%;
+  }
+
+  .drp-presets--top button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 360px+: nappi lukittu 44px, solut jakavat ylimääräisen tilan tasaisesti → visuaaliset gapit */
+@media (min-width: 360px) and (max-width: 767px) {
+  .drp-calendar .rdp {
+    --rdp-cell-size: 44px;
+  }
+
+  /* Varmistetaan leveysketju: rdp → months → month → table → solut */
+  .drp-calendar .rdp,
+  .drp-calendar .rdp-months,
+  .drp-calendar .rdp-month {
+    width: 100%;
+  }
+
+  /* rdp asettaa max-width: cell-size*7 ja head_cell/cell width: cell-size —
+     kaikki ylikirjoitetaan jotta taulukko voi venyä koko leveyteen */
+  .drp-calendar .rdp-table {
+    width: 100% !important;
+    max-width: none !important;
+    table-layout: fixed;
+  }
+
+  .drp-calendar .rdp-cell,
+  .drp-calendar .rdp-head_cell {
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+/* ---- Touch-laitteet: poistetaan sticky hover HDS-napeista dialogi-footerissa ---- */
+/* Mobiiliselaimet (iOS/Android) pitävät :hover-tilan naputuksen jälkeen, kunnes
+   seuraava naputus. Tämä estää "roikkuvan" hover-korostuksen kun modaali avautuu. */
+@media (hover: none) {
+  .drp-footer .hds-button--secondary:hover {
+    background-color: transparent !important;
+    border-color: var(--color-black-90, #1a1a1a) !important;
+    color: var(--color-black-90, #1a1a1a) !important;
+  }
+  .drp-footer .hds-button--primary:hover {
+    background-color: var(--color-coat-of-arms, #0000bf) !important;
+    border-color: var(--color-coat-of-arms, #0000bf) !important;
+    color: #fff !important;
   }
 }

@@ -9,7 +9,9 @@ import {
   startOfMonth,
   endOfMonth,
   subMonths,
+  differenceInDays,
 } from 'date-fns';
+import { Logo, logoFi, logoFiDark } from 'hds-react';
 import { DateRangePicker } from './components/DateRangePicker';
 import type { DateRange, PresetRange } from './components/DateRangePicker';
 
@@ -70,31 +72,38 @@ const pastPresets: PresetRange[] = [
   },
 ];
 
-function formatRange(range: DateRange): string {
-  if (!range.startDate) return '–';
-  const start = range.startDate.toLocaleDateString('fi-FI');
-  const end = range.endDate ? range.endDate.toLocaleDateString('fi-FI') : '?';
-  return `${start} – ${end}`;
-}
 
 export default function App() {
   const [busRange, setBusRange] = useState<DateRange>({ startDate: null, endDate: null });
   const [blackRange, setBlackRange] = useState<DateRange>({ startDate: null, endDate: null });
   const [analyticsRange, setAnalyticsRange] = useState<DateRange>({ startDate: null, endDate: null });
   const [basicRange, setBasicRange] = useState<DateRange>({ startDate: null, endDate: null });
+  const [reportRange, setReportRange] = useState<DateRange>({
+    startDate: new Date(2026, 1, 2),  // 2.2.2026
+    endDate: new Date(2026, 2, 26),   // 26.3.2026
+  });
+  const [bookingRange, setBookingRange] = useState<DateRange>({ startDate: null, endDate: null });
+
+  const reportError =
+    reportRange.startDate && reportRange.endDate &&
+    differenceInDays(reportRange.endDate, reportRange.startDate) > 31
+      ? 'Valitse enintään 31 päivän jakso'
+      : undefined;
 
   return (
     <div className="demo-page">
       <header className="demo-header">
         <div className="demo-header__inner">
           <div className="demo-header__logo-row">
-            <span className="demo-header__wordmark">Helsinki</span>
+            <Logo src={logoFiDark} size="medium" alt="Helsingin kaupunki" />
           </div>
-          <span className="demo-header__badge">Prototyyppi</span>
           <h1 className="demo-header__title">DateRangePicker</h1>
           <p className="demo-header__desc">
-            HDS Date input -komponentin uusi päivämäärävälivariantti.
-            Tuki pikavalintopainikkeille, min/maxDate-rajoituksille ja kahdelle väripaletille.
+            Päivämäärävälin valitseva syötekomponentti, joka laajentaa HDS Date inputin
+            toiminnallisuutta. Käyttäjä valitsee ensin alkupäivän, sitten loppupäivän.
+            Tuki pikavalintapainikkeille, <code>minDate</code>/<code>maxDate</code>-rajoituksille
+            ja kahdelle väripaletille. Responsiivinen: mobiilissa koko ruudun modaali,
+            desktopilla kompakti pudotusvalikko kahdella rinnakkaisella kuukaudella.
           </p>
           <div className="demo-header__stack">
             <span>hds-react 5.0</span>
@@ -109,11 +118,13 @@ export default function App() {
         {/* ---- Demo 1: Kaksi väriteemat rinnakkain ---- */}
         <section className="demo-section">
           <div className="demo-section__meta">
-            <span className="demo-section__num">01</span>
-            <h2 className="demo-section__title">Range-korostusväri</h2>
+            <h2 className="demo-section__title">Väripaletit</h2>
             <p className="demo-section__desc">
-              Kaksi värivaihtoehtoa välipäivien korostukseen. Molemmat käyttävät{' '}
-              <code>--color-bus</code> valitulle alkupäivälle ja loppupäivälle.
+              <code>colorScheme="bus"</code> korostaa välipäivät bus-light-sinisellä,{' '}
+              <code>colorScheme="black"</code> black-10-harmaalla. Valittu alku- ja
+              loppupäivä merkitään aina <code>--color-bus</code>- tai mustalla täytöllä.
+              Esimerkeissä tulevaisuuden pikavalinnat: tänään, tällä ja ensi viikolla,
+              tänä viikonloppuna.
             </p>
           </div>
           <div className="demo-section__component demo-section__component--split">
@@ -131,9 +142,6 @@ export default function App() {
                 colorScheme="bus"
                 presetRanges={futurePresets}
               />
-              {busRange.startDate && (
-                <p className="demo-result">Valittu: <strong>{formatRange(busRange)}</strong></p>
-              )}
             </div>
             <div>
               <p className="demo-variant__label">
@@ -149,9 +157,6 @@ export default function App() {
                 colorScheme="black"
                 presetRanges={futurePresets}
               />
-              {blackRange.startDate && (
-                <p className="demo-result">Valittu: <strong>{formatRange(blackRange)}</strong></p>
-              )}
             </div>
           </div>
         </section>
@@ -159,11 +164,12 @@ export default function App() {
         {/* ---- Demo 2: Menneisyyteen katsovat pikavalinnat ---- */}
         <section className="demo-section">
           <div className="demo-section__meta">
-            <span className="demo-section__num">02</span>
-            <h2 className="demo-section__title">Analytiikka / raportointi</h2>
+            <h2 className="demo-section__title">Menneisyyden pikavalinnat</h2>
             <p className="demo-section__desc">
-              Menneisyyteen katsovat pikavalinnat. Palvelu määrittää omat pikavalintansa.
-              Tässä <code>maxDate=tänään</code> ja kalenteri aukeaa edelliseen kuuhun.
+              Pikavalinnat konfiguroidaan <code>presetRanges</code>-propilla —
+              palvelu määrittää omat vaihtoehtansa käyttötapaukseen sopivasti.
+              Tässä <code>maxDate=tänään</code> rajoittaa valinnan menneisyyteen
+              ja <code>defaultMonth</code> avaa kalenterin edelliseen kuuhun.
             </p>
           </div>
           <div className="demo-section__component">
@@ -178,20 +184,18 @@ export default function App() {
               colorScheme="bus"
               defaultMonth={startOfMonth(subMonths(new Date(), 1))}
             />
-            {analyticsRange.startDate && (
-              <p className="demo-result">Valittu: <strong>{formatRange(analyticsRange)}</strong></p>
-            )}
           </div>
         </section>
 
         {/* ---- Demo 3: Ilman pikavalintoja ---- */}
-        <section className="demo-section demo-section--last">
+        <section className="demo-section">
           <div className="demo-section__meta">
-            <span className="demo-section__num">03</span>
-            <h2 className="demo-section__title">Ilman pikavalintoja</h2>
+            <h2 className="demo-section__title">Pakollinen kenttä</h2>
             <p className="demo-section__desc">
-              Vapaa välinvalinta ilman <code>presetRanges</code>-propsia.
-              Kenttä on merkitty pakolliseksi (<code>required</code>).
+              Ilman <code>presetRanges</code>-propsia komponentti näyttää vain
+              kalenterin. Päivämäärät voi kirjoittaa myös tekstikenttiin suoraan
+              muodossa <code>pp.kk.vvvv</code>. <code>required</code>-proppi
+              lisää pakollisuusmerkinnän labeliin.
             </p>
           </div>
           <div className="demo-section__component">
@@ -204,9 +208,57 @@ export default function App() {
               required
               colorScheme="black"
             />
-            {basicRange.startDate && (
-              <p className="demo-result">Valittu: <strong>{formatRange(basicRange)}</strong></p>
-            )}
+          </div>
+        </section>
+
+        {/* ---- Demo 4: Validointi — yli 31 päivän jakso ---- */}
+        <section className="demo-section">
+          <div className="demo-section__meta">
+            <h2 className="demo-section__title">Validointi</h2>
+            <p className="demo-section__desc">
+              <code>errorText</code>-proppi aktivoi virhetilan: punainen
+              reunaviiva ja virheilmoitus. Tässä esimerkissä yli 31 päivän
+              jakso on kielletty — virhe ilmestyy kun valittu väli ylittää
+              rajan.
+            </p>
+          </div>
+          <div className="demo-section__component">
+            <DateRangePicker
+              id="report-dates"
+              label="Raporttijako"
+              language="fi"
+              value={reportRange}
+              onChange={setReportRange}
+              presetRanges={pastPresets}
+              maxDate={new Date()}
+              colorScheme="bus"
+              errorText={reportError}
+            />
+          </div>
+        </section>
+
+        {/* ---- Demo 5: Tapahtumien varaus (minDate = tänään) ---- */}
+        <section className="demo-section demo-section--last">
+          <div className="demo-section__meta">
+            <h2 className="demo-section__title">Tapahtumien varaus</h2>
+            <p className="demo-section__desc">
+              <code>minDate={'{new Date()}'}</code> estää menneisyyden
+              valinnan — sopii varausjärjestelmiin ja tapahtumahakuihin.
+              Pikavalinnat ohjaavat tulevaisuuteen: tänään, tällä ja ensi
+              viikolla, tänä viikonloppuna.
+            </p>
+          </div>
+          <div className="demo-section__component">
+            <DateRangePicker
+              id="booking-dates"
+              label="Varausajankohta"
+              language="fi"
+              value={bookingRange}
+              onChange={setBookingRange}
+              presetRanges={futurePresets}
+              minDate={startOfDay(new Date())}
+              colorScheme="bus"
+            />
           </div>
         </section>
 
@@ -214,8 +266,8 @@ export default function App() {
 
       <footer className="demo-footer">
         <div className="demo-footer__inner">
-          <span className="demo-footer__wordmark">Helsinki</span>
-          <p className="demo-footer__text">HDS-prototyyppi · Helsinki Design System · 2025</p>
+          <Logo src={logoFi} size="small" alt="Helsingin kaupunki" />
+          <p className="demo-footer__text">Helsinki Design System · Prototyyppi · 2026</p>
         </div>
       </footer>
     </div>

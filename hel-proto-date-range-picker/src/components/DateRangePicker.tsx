@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { DayPicker } from 'react-day-picker';
 import type { DateRange as RdpDateRange } from 'react-day-picker';
-import { format, parse, isValid } from 'date-fns';
+import { format, parse, isValid, addMonths, subMonths, startOfMonth, endOfMonth, isAfter, isBefore, getDay } from 'date-fns';
 import { fi as fiFns, sv as svFns, enGB as enFns } from 'date-fns/locale';
-import { Button, ButtonSize, ButtonVariant, IconCalendar, IconCheck, IconCross, IconCrossCircle, IconAngleLeft, IconAngleRight } from 'hds-react';
+import { Button, ButtonSize, ButtonVariant, IconCalendar, IconCheck, IconCross, IconCrossCircle, IconAngleLeft, IconAngleRight, IconErrorFill } from 'hds-react';
 import 'react-day-picker/dist/style.css';
 import './DateRangePicker.css';
 
@@ -40,6 +40,30 @@ const DATE_FORMAT = 'd.M.yyyy';
 
 const localeMap = { fi: fiFns, sv: svFns, en: enFns };
 
+/** "Valittu ajankohta: 25.3.2026–28.3.2026" tai "Valitse alkupäivä" jos ei valintaa */
+function getPhaseLabel(
+  pendingRange: RdpDateRange | undefined,
+  selectionLabel: string,
+  phaseStart: string,
+): string {
+  const from = pendingRange?.from;
+  const to = pendingRange?.to;
+  if (!from) return phaseStart;
+  const fromStr = format(from, DATE_FORMAT);
+  if (!to) return `${selectionLabel}: ${fromStr} –`;
+  return `${selectionLabel}: ${fromStr} – ${format(to, DATE_FORMAT)}`;
+}
+
+/** "Maaliskuu–Huhtikuu 2026" tai "Joulukuu 2025–Tammikuu 2026" */
+function getCombinedMonthLabel(first: Date, second: Date, locale: (typeof localeMap)[keyof typeof localeMap]): string {
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const m1 = cap(format(first, 'LLLL', { locale }));
+  const m2 = cap(format(second, 'LLLL', { locale }));
+  const y1 = first.getFullYear();
+  const y2 = second.getFullYear();
+  return y1 === y2 ? `${m1}–${m2} ${y1}` : `${m1} ${y1}–${m2} ${y2}`;
+}
+
 const t = {
   fi: {
     startLabel: 'Alkupäivä',
@@ -50,13 +74,21 @@ const t = {
     dialogLabel: 'Päivämäärävälin valitsin',
     phaseStart: 'Valitse alkupäivä',
     phaseEnd: 'Valitse loppupäivä',
-    announceStart: (d: string) => `Alkupäivä ${d} valittu. Valitse loppupäivä.`,
-    announceEnd: (d: string) => `Loppupäivä ${d} valittu. Paina Valitse vahvistaaksesi.`,
-    confirmButton: 'Valitse',
-    closeButton: 'Sulje',
+    selectionLabel: 'Valittu ajankohta',
+    openAnnounceStart: 'Kalenteri avattu. Valitse alkupäivä nuolinäppäimillä.',
+    openAnnounceEnd: (d: string) => `Kalenteri avattu. Alkupäivä on ${d}. Valitse loppupäivä.`,
+    announceStart: (d: string) => `Alkupäivä valittu: ${d}. Valitse seuraavaksi loppupäivä.`,
+    announceNewStart: (d: string) => `Uusi alkupäivä: ${d}. Aiempi valinta tyhjennetty. Valitse loppupäivä.`,
+    announceEnd: (d: string) => `Loppupäivä valittu: ${d}. Paina Vahvista valinta -painiketta.`,
+    confirmButton: 'Vahvista valinta',
+    closeButton: 'Sulje vahvistamatta',
     clearButton: 'Tyhjennä valinta',
+    prevMonth: 'Edellinen kuukausi',
+    nextMonth: 'Seuraava kuukausi',
     separator: '–',
     requiredText: 'pakollinen kenttä',
+    presetRangesLabel: 'Pikavalinnat',
+    formatHint: 'Syötä päivämäärät muodossa pp.kk.vvvv',
   },
   sv: {
     startLabel: 'Startdatum',
@@ -67,13 +99,21 @@ const t = {
     dialogLabel: 'Datumintervallväljare',
     phaseStart: 'Välj startdatum',
     phaseEnd: 'Välj slutdatum',
-    announceStart: (d: string) => `Startdatum ${d} valt. Välj slutdatum.`,
-    announceEnd: (d: string) => `Slutdatum ${d} valt. Tryck Välj för att bekräfta.`,
-    confirmButton: 'Välj',
-    closeButton: 'Stäng',
+    selectionLabel: 'Vald period',
+    openAnnounceStart: 'Kalender öppnad. Välj startdatum med piltangenterna.',
+    openAnnounceEnd: (d: string) => `Kalender öppnad. Startdatum är ${d}. Välj slutdatum.`,
+    announceStart: (d: string) => `Startdatum valt: ${d}. Välj slutdatum.`,
+    announceNewStart: (d: string) => `Nytt startdatum: ${d}. Föregående val rensat. Välj slutdatum.`,
+    announceEnd: (d: string) => `Slutdatum valt: ${d}. Tryck Bekräfta val för att bekräfta.`,
+    confirmButton: 'Bekräfta val',
+    closeButton: 'Stäng utan bekräftelse',
     clearButton: 'Rensa val',
+    prevMonth: 'Föregående månad',
+    nextMonth: 'Nästa månad',
     separator: '–',
     requiredText: 'obligatoriskt fält',
+    presetRangesLabel: 'Snabbval',
+    formatHint: 'Ange datum i formatet dd.mm.åååå',
   },
   en: {
     startLabel: 'Start date',
@@ -84,13 +124,21 @@ const t = {
     dialogLabel: 'Date range picker',
     phaseStart: 'Select start date',
     phaseEnd: 'Select end date',
-    announceStart: (d: string) => `Start date ${d} selected. Select end date.`,
-    announceEnd: (d: string) => `End date ${d} selected. Press Select to confirm.`,
-    confirmButton: 'Select',
-    closeButton: 'Close',
+    selectionLabel: 'Selected period',
+    openAnnounceStart: 'Calendar opened. Select start date using arrow keys.',
+    openAnnounceEnd: (d: string) => `Calendar opened. Start date is ${d}. Select end date.`,
+    announceStart: (d: string) => `Start date selected: ${d}. Now select end date.`,
+    announceNewStart: (d: string) => `New start date: ${d}. Previous selection cleared. Select end date.`,
+    announceEnd: (d: string) => `End date selected: ${d}. Press Confirm selection to confirm.`,
+    confirmButton: 'Confirm selection',
+    closeButton: 'Close without confirming',
     clearButton: 'Clear selection',
+    prevMonth: 'Previous month',
+    nextMonth: 'Next month',
     separator: '–',
     requiredText: 'required',
+    presetRangesLabel: 'Quick select',
+    formatHint: 'Enter dates in format dd.mm.yyyy',
   },
 } as const;
 
@@ -125,6 +173,77 @@ export function DateRangePicker({
     value.endDate ? format(value.endDate, DATE_FORMAT) : ''
   );
   const [announceText, setAnnounceText] = useState('');
+  const [phase, setPhase] = useState<'start' | 'end'>('start');
+  const [currentMonth, setCurrentMonth] = useState<Date>(() =>
+    startOfMonth(defaultMonthProp ?? value.startDate ?? new Date())
+  );
+  const [animDir, setAnimDir] = useState<'forward' | 'back' | null>(null);
+  const [animKey, setAnimKey] = useState(0);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  );
+
+  // Overflow-indikaattorien sarakeprosentit CSS-muuttujiksi
+  // getDay: 0=Su,1=Ma,...,6=La → weekStartsOn=1: (d+6)%7 = 0=Ma,...,6=Su
+  // Mobiili: 1 kuukausi (7 saraketta = 100%). Desktop: 2 kuukautta rinnakkain.
+  // Desktop-layout: kuukausi1 (7×40=280px) + jakaja (8+1+8=17px) + kuukausi2 (280px) = 577px
+  // Mobiili: CSS custom properties overflow-gradienteille (::before/::after pseudo-elementit)
+  const overflowEndX = useMemo(() => {
+    if (!isMobile) return undefined;
+    const col = (getDay(endOfMonth(currentMonth)) + 6) % 7;
+    return `${(((col + 1) / 7) * 100).toFixed(1)}%`;
+  }, [currentMonth, isMobile]);
+
+  const overflowStartX = useMemo(() => {
+    if (!isMobile) return undefined;
+    const col = (getDay(startOfMonth(currentMonth)) + 6) % 7;
+    return `${((col / 7) * 100).toFixed(1)}%`;
+  }, [currentMonth, isMobile]);
+
+  // Desktop: React-elementit overflow-gradienteille — eriytetty mobiilista koska 2 kuukautta rinnakkain
+  // Layout: M1 (7×40=280px) | jakaja (8+1+8=17px) | M2 (280px). Korkeus: header(40px) + N×40px.
+  const desktopOverflows = useMemo(() => {
+    if (isMobile || !pendingRange?.from || !pendingRange?.to) return [];
+    const from = pendingRange.from;
+    const to = pendingRange.to;
+    const CELL = 40;
+    const M1_W = 7 * CELL;   // 280
+    const M2_X = M1_W + 17;  // 297 (280 + padding 8 + border 1 + margin 8)
+    const M2_W = 7 * CELL;   // 280
+    const month1 = currentMonth;
+    const month2 = addMonths(currentMonth, 1);
+    const weekCount = (m: Date): number => {
+      const offset = (getDay(startOfMonth(m)) + 6) % 7;
+      const days = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
+      return Math.ceil((offset + days) / 7);
+    };
+    const dayCol = (d: Date) => (getDay(d) + 6) % 7;
+    // end-gradient: range-bg alkaen kolumnin oikeasta reunasta, häipyy oikealle
+    const endGrad = (c: number) => {
+      const pct = `${((c + 1) / 7 * 100).toFixed(1)}%`;
+      return `linear-gradient(to right, transparent ${pct}, var(--drp-range-bg, #f0f0ff) ${pct}, var(--drp-range-bg-0, rgba(240,240,255,0)) 100%)`;
+    };
+    // start-gradient: häipyy vasemmalta range-bg-väriksi kolumnin vasempaan reunaan
+    const startGrad = (c: number) => {
+      const pct = `${(c / 7 * 100).toFixed(1)}%`;
+      return `linear-gradient(to right, var(--drp-range-bg-0, rgba(240,240,255,0)) 0%, var(--drp-range-bg, #f0f0ff) ${pct}, transparent ${pct})`;
+    };
+    const base: React.CSSProperties = { position: 'absolute', height: 34, pointerEvents: 'none', zIndex: 5 };
+    const els: Array<{ key: string; style: React.CSSProperties }> = [];
+    // M1 overflow-end: range jatkuu kuukauden 1 viimeisen rivin ohi kuukauteen 2
+    if (!isAfter(from, endOfMonth(month1)) && isAfter(to, endOfMonth(month1)))
+      els.push({ key: 'end1', style: { ...base, top: weekCount(month1) * CELL + 3, left: 0, width: M1_W, background: endGrad(dayCol(endOfMonth(month1))) } });
+    // M2 overflow-start: range alkoi ennen kuukautta 2 (tuli kuukaudesta 1 tai aiemmin)
+    if (isBefore(from, startOfMonth(month2)) && !isBefore(to, startOfMonth(month2)))
+      els.push({ key: 'start2', style: { ...base, top: CELL + 3, left: M2_X, width: M2_W, background: startGrad(dayCol(startOfMonth(month2))) } });
+    // M1 overflow-start: range alkoi ennen kuukautta 1
+    if (isBefore(from, startOfMonth(month1)) && !isBefore(to, startOfMonth(month1)))
+      els.push({ key: 'start1', style: { ...base, top: CELL + 3, left: 0, width: M1_W, background: startGrad(dayCol(startOfMonth(month1))) } });
+    // M2 overflow-end: range jatkuu kuukauden 2 ohi
+    if (!isAfter(from, endOfMonth(month2)) && isAfter(to, endOfMonth(month2)))
+      els.push({ key: 'end2', style: { ...base, top: weekCount(month2) * CELL + 3, left: M2_X, width: M2_W, background: endGrad(dayCol(endOfMonth(month2))) } });
+    return els;
+  }, [currentMonth, isMobile, pendingRange]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -137,6 +256,14 @@ export function DateRangePicker({
   const dialogId = `${id}-dialog`;
   const groupId = `${id}-group`;
   const announceId = `${id}-announce`;
+
+  // Seuraa näytön leveyttä mobiili/desktop-vaihtelua varten
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // Sync external value changes
   useEffect(() => {
@@ -155,19 +282,39 @@ export function DateRangePicker({
 
   const openDialog = useCallback(() => {
     setIsOpen(true);
-    // Move focus into dialog on next render
+    setPhase(pendingRange?.from ? 'end' : 'start');
+    setAnimDir(null);
     requestAnimationFrame(() => {
-      const firstFocusable = dialogRef.current?.querySelector<HTMLElement>(
-        'button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      // Fokusjärjestys: ensimmäinen pikavalinta → edellinen kuukausi -nappi → valittu alkupäivä → tänään → ensimmäinen päivä
+      const firstPreset = dialog.querySelector<HTMLElement>('.drp-presets__buttons button:not([disabled])');
+      const prevNavBtn = dialog.querySelector<HTMLElement>('.drp-nav-btn');
+      const selectedStart = dialog.querySelector<HTMLElement>('.rdp-day_range_start');
+      const todayBtn = dialog.querySelector<HTMLElement>(
+        '.rdp-day_today:not(.rdp-day_disabled):not(.rdp-day_outside)'
       );
-      firstFocusable?.focus();
+      const firstDay = dialog.querySelector<HTMLElement>(
+        '.rdp-day:not(.rdp-day_disabled):not(.rdp-day_outside)'
+      );
+      const target = firstPreset ?? prevNavBtn ?? selectedStart ?? todayBtn ?? firstDay;
+      if (target) {
+        // Synteettinen keydown asettaa selaimen "näppäimistönavigointi"-tilaan,
+        // jolloin :focus-visible triggeröityy ja fokusrengas näkyy heti.
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+        target.focus();
+      }
     });
-    announce(pendingRange?.from ? strings.phaseEnd : strings.phaseStart);
-  }, [pendingRange?.from, strings, announce]);
+    announce(
+      pendingRange?.from
+        ? strings.openAnnounceEnd(format(pendingRange.from, DATE_FORMAT, { locale }))
+        : strings.openAnnounceStart
+    );
+  }, [pendingRange?.from, strings, locale, announce]);
 
-  // Closing without confirming reverts pending state to last confirmed value
   const closeDialog = useCallback(() => {
     setIsOpen(false);
+    setPhase('start');
     setPendingRange({ from: value.startDate ?? undefined, to: value.endDate ?? undefined });
     setStartInputValue(value.startDate ? format(value.startDate, DATE_FORMAT) : '');
     setEndInputValue(value.endDate ? format(value.endDate, DATE_FORMAT) : '');
@@ -176,17 +323,49 @@ export function DateRangePicker({
 
   const handleConfirm = useCallback(() => {
     onChange({ startDate: pendingRange!.from!, endDate: pendingRange!.to! });
+    setStartInputValue(format(pendingRange!.from!, DATE_FORMAT));
+    setEndInputValue(format(pendingRange!.to!, DATE_FORMAT));
+    setPhase('start');
     setIsOpen(false);
     calendarButtonRef.current?.focus();
   }, [pendingRange, onChange]);
 
-  // Clear button — resets confirmed value and all display state
   const handleClear = useCallback(() => {
     onChange({ startDate: null, endDate: null });
     setPendingRange(undefined);
     setStartInputValue('');
     setEndInputValue('');
+    setPhase('start');
   }, [onChange]);
+
+  // aria-current="date" tänään-päivälle — rdp ei lisää tätä automaattisesti
+  useEffect(() => {
+    if (!isOpen || !dialogRef.current) return;
+    const todayBtns = dialogRef.current.querySelectorAll<HTMLButtonElement>('.rdp-day_today');
+    todayBtns.forEach((btn) => btn.setAttribute('aria-current', 'date'));
+    return () => {
+      todayBtns.forEach((btn) => btn.removeAttribute('aria-current'));
+    };
+  }, [isOpen, currentMonth]);
+
+  // Body scroll lock — estää taustan scrollauksen kun mobiilidialogin on auki.
+  // Desktopilla dialogi on dropdown, ei modaali — tausta saa scrollata normaalisti.
+  // iOS Safari ignooraa overflow:hidden bodylla, joten käytetään position:fixed -tekniikkaa.
+  useEffect(() => {
+    if (!isOpen || !isMobile) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen, isMobile]);
 
   // Click outside
   useEffect(() => {
@@ -238,41 +417,59 @@ export function DateRangePicker({
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen]);
 
-  const handleDaySelect = useCallback(
-    (range: RdpDateRange | undefined) => {
-      if (!range) {
-        setPendingRange(undefined);
-        setStartInputValue('');
-        setEndInputValue('');
-        announce(strings.phaseStart);
-        return;
-      }
-      if (range.from && !range.to) {
-        setPendingRange(range);
-        setStartInputValue(format(range.from, DATE_FORMAT));
-        setEndInputValue('');
-        announce(strings.announceStart(format(range.from, DATE_FORMAT, { locale })));
-      } else if (range.from && range.to) {
-        setPendingRange(range);
-        setStartInputValue(format(range.from, DATE_FORMAT));
-        setEndInputValue(format(range.to, DATE_FORMAT));
-        announce(strings.announceEnd(format(range.to, DATE_FORMAT, { locale })));
+  const handleDayClick = useCallback(
+    (day: Date, modifiers: { disabled?: boolean; [key: string]: boolean | undefined }) => {
+      if (modifiers.disabled) return;
+      if (phase === 'start') {
+        const isNewCycle = !!(pendingRange?.from);
+        setPendingRange({ from: day, to: undefined });
+        setPhase('end');
+        announce(
+          isNewCycle
+            ? strings.announceNewStart(format(day, DATE_FORMAT, { locale }))
+            : strings.announceStart(format(day, DATE_FORMAT, { locale }))
+        );
+      } else {
+        if (pendingRange?.from && day < pendingRange.from) {
+          // Klikattu ennen alkupäivää → uusi alkupäivä, odotetaan loppupäivää
+          setPendingRange({ from: day, to: undefined });
+          announce(strings.announceStart(format(day, DATE_FORMAT, { locale })));
+        } else {
+          // Loppupäivä valittu → sykli valmis, seuraava klikkaus aloittaa alusta
+          setPendingRange((prev) => ({ from: prev?.from, to: day }));
+          setPhase('start');
+          announce(strings.announceEnd(format(day, DATE_FORMAT, { locale })));
+        }
       }
     },
-    [strings, locale, announce]
+    [phase, pendingRange, strings, locale, announce]
   );
 
   const handlePreset = useCallback(
     (preset: PresetRange) => {
       const { startDate, endDate } = preset.getRange();
+      const targetMonth = startOfMonth(startDate);
       setPendingRange({ from: startDate, to: endDate });
-      setStartInputValue(format(startDate, DATE_FORMAT));
-      setEndInputValue(format(endDate, DATE_FORMAT));
+      setPhase('start');
+      // Animaatio tarvitaan vain jos kohde ei ole jo näkyvissä.
+      // Mobiili: 1 kuukausi näkyvissä. Desktop: 2 kuukautta (currentMonth + currentMonth+1).
+      // Normalisoidaan startOfMonth koska currentMonth voi olla kuun keskipäivältä.
+      const visibleFirst = startOfMonth(currentMonth);
+      const visibleSecond = startOfMonth(addMonths(currentMonth, 1));
+      const alreadyVisible = isMobile
+        ? targetMonth.getTime() === visibleFirst.getTime()
+        : targetMonth.getTime() === visibleFirst.getTime() ||
+          targetMonth.getTime() === visibleSecond.getTime();
+      if (!alreadyVisible) {
+        setAnimDir(targetMonth >= currentMonth ? 'forward' : 'back');
+        setAnimKey((k) => k + 1);
+        setCurrentMonth(targetMonth);
+      }
       announce(
         `${preset.label}: ${format(startDate, DATE_FORMAT, { locale })} ${strings.separator} ${format(endDate, DATE_FORMAT, { locale })}`
       );
     },
-    [locale, strings.separator, announce]
+    [currentMonth, isMobile, locale, strings.separator, announce]
   );
 
   const handleStartBlur = () => {
@@ -283,20 +480,44 @@ export function DateRangePicker({
   };
 
   const handleEndBlur = () => {
-    const parsed = parse(endInputValue, DATE_FORMAT, new Date());
-    if (isValid(parsed)) {
-      setPendingRange((prev) => ({ from: prev?.from, to: parsed }));
+    const parsedEnd = parse(endInputValue, DATE_FORMAT, new Date());
+    if (isValid(parsedEnd)) {
+      setPendingRange((prev) => ({ from: prev?.from, to: parsedEnd }));
+      // Vahvista valinta kun kalenteri ei ole auki — kattaa mobiilin "Valmis"-napin (blur)
+      if (!isOpen) {
+        const parsedStart = parse(startInputValue, DATE_FORMAT, new Date());
+        if (isValid(parsedStart)) {
+          onChange({ startDate: parsedStart, endDate: parsedEnd });
+        }
+      }
     }
   };
 
-  const defaultMonth = defaultMonthProp
-    ?? (pendingRange?.from
-      ? new Date(pendingRange.from.getFullYear(), pendingRange.from.getMonth(), 1)
-      : new Date());
+  const goToPrevMonth = useCallback(() => {
+    setAnimDir('back');
+    setAnimKey((k) => k + 1);
+    setCurrentMonth((m) => startOfMonth(subMonths(m, 1)));
+  }, []);
+
+  const goToNextMonth = useCallback(() => {
+    setAnimDir('forward');
+    setAnimKey((k) => k + 1);
+    setCurrentMonth((m) => startOfMonth(addMonths(m, 1)));
+  }, []);
+
+  const handleMonthChange = useCallback(
+    (newMonth: Date) => {
+      setAnimDir(newMonth > currentMonth ? 'forward' : 'back');
+      setAnimKey((k) => k + 1);
+      setCurrentMonth(newMonth);
+    },
+    [currentMonth]
+  );
 
   const canConfirm = !!(pendingRange?.from && pendingRange?.to);
   const isInvalid = !!errorText;
-  const describedBy = [helperText ? helperId : '', errorText ? errorId : '']
+  const formatHintId = `${id}-format`;
+  const describedBy = [formatHintId, helperText ? helperId : '', errorText ? errorId : '']
     .filter(Boolean)
     .join(' ') || undefined;
 
@@ -323,97 +544,96 @@ export function DateRangePicker({
         )}
       </span>
 
-      {/* Input group */}
-      <div
-        id={groupId}
-        className={[
-          'drp-input-group',
-          isInvalid ? 'drp-input-group--invalid' : '',
-          disabled ? 'drp-input-group--disabled' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        role="group"
-        aria-labelledby={`${id}-label`}
-      >
-        <input
-          ref={startInputRef}
-          id={`${id}-start`}
-          type="text"
-          inputMode="numeric"
-          className="drp-input"
-          aria-label={strings.startLabel}
-          aria-describedby={describedBy}
-          aria-invalid={isInvalid || undefined}
-          aria-required={required || undefined}
-          placeholder={strings.startPlaceholder}
-          value={startInputValue}
-          disabled={disabled}
-          onChange={(e) => setStartInputValue(e.target.value)}
-          onBlur={handleStartBlur}
-        />
-        <span className="drp-separator" aria-hidden="true">
-          {strings.separator}
-        </span>
-        <input
-          ref={endInputRef}
-          id={`${id}-end`}
-          type="text"
-          inputMode="numeric"
-          className="drp-input"
-          aria-label={strings.endLabel}
-          aria-invalid={isInvalid || undefined}
-          aria-required={required || undefined}
-          placeholder={strings.endPlaceholder}
-          value={endInputValue}
-          disabled={disabled}
-          onChange={(e) => setEndInputValue(e.target.value)}
-          onBlur={handleEndBlur}
-        />
-        {/* ✅ HDS Core: clear button — visible when a range is confirmed, matches HDS DateInput clear pattern */}
-        {value.startDate && !disabled && (
-          <button
-            type="button"
-            className="drp-clear-btn"
-            aria-label={strings.clearButton}
-            onClick={handleClear}
-          >
-            {/* ✅ HDS Core: IconCrossCircle — sama kuin HDS SearchInput clear-painike */}
-            <IconCrossCircle aria-hidden="true" />
-          </button>
-        )}
-        <button
-          ref={calendarButtonRef}
-          type="button"
-          className="drp-calendar-btn"
-          aria-label={strings.openButton}
-          aria-haspopup="dialog"
-          aria-expanded={isOpen}
-          aria-controls={dialogId}
-          disabled={disabled}
-          onClick={() => (isOpen ? closeDialog() : openDialog())}
+      {/* Input wrapper — position:relative ankkuroi dialogin inputin alapuolelle */}
+      <div className="drp-input-wrapper">
+        {/* Input group */}
+        <div
+          id={groupId}
+          className={[
+            'drp-input-group',
+            isInvalid ? 'drp-input-group--invalid' : '',
+            disabled ? 'drp-input-group--disabled' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          role="group"
+          aria-labelledby={`${id}-label`}
         >
-          {/* ✅ HDS Core: IconCalendar */}
-          <IconCalendar aria-hidden="true" />
-        </button>
-      </div>
+          <input
+            ref={startInputRef}
+            id={`${id}-start`}
+            type="text"
+            inputMode="text"
+            className="drp-input"
+            aria-label={strings.startLabel}
+            aria-describedby={describedBy}
+            aria-invalid={isInvalid || undefined}
+            aria-required={required || undefined}
+            value={startInputValue}
+            disabled={disabled}
+            onChange={(e) => setStartInputValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleStartBlur(); endInputRef.current?.focus(); } }}
+            onBlur={handleStartBlur}
+          />
+          <span className="drp-separator" aria-hidden="true">
+            {strings.separator}
+          </span>
+          <input
+            ref={endInputRef}
+            id={`${id}-end`}
+            type="text"
+            inputMode="text"
+            className="drp-input"
+            aria-label={strings.endLabel}
+            aria-invalid={isInvalid || undefined}
+            aria-required={required || undefined}
+            value={endInputValue}
+            disabled={disabled}
+            onChange={(e) => setEndInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const startParsed = parse(startInputValue, DATE_FORMAT, new Date());
+                const endParsed = parse(endInputValue, DATE_FORMAT, new Date());
+                if (isValid(startParsed) && isValid(endParsed)) {
+                  // Molemmat kenttät valideja → vahvistetaan valinta ilman kalenterin avaamista
+                  onChange({ startDate: startParsed, endDate: endParsed });
+                } else {
+                  handleEndBlur();
+                }
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            onBlur={handleEndBlur}
+          />
+          {/* ✅ HDS Core: clear button */}
+          {value.startDate && !disabled && (
+            <button
+              type="button"
+              className="drp-clear-btn"
+              aria-label={strings.clearButton}
+              onClick={handleClear}
+            >
+              <IconCrossCircle aria-hidden="true" />
+            </button>
+          )}
+          <button
+            ref={calendarButtonRef}
+            type="button"
+            className="drp-calendar-btn"
+            aria-label={strings.openButton}
+            aria-haspopup="dialog"
+            aria-expanded={isOpen}
+            aria-controls={dialogId}
+            disabled={disabled}
+            onClick={() => (isOpen ? closeDialog() : openDialog())}
+          >
+            <IconCalendar aria-hidden="true" />
+          </button>
+        </div>
 
-      {/* Helper text */}
-      {helperText && (
-        <p id={helperId} className="drp-helper-text">
-          {helperText}
-        </p>
-      )}
-
-      {/* Error text */}
-      {errorText && (
-        <p id={errorId} className="drp-error-text" role="alert">
-          {errorText}
-        </p>
-      )}
-
-      {/* Calendar dialog */}
-      {isOpen && (
+        {/* Calendar dialog */}
+        {isOpen && (
         <div
           ref={dialogRef}
           id={dialogId}
@@ -425,67 +645,154 @@ export function DateRangePicker({
           {/* Calendar — react-day-picker */}
           {/* ⚠️ Custom: DayPicker (react-day-picker) — EI suoraan Drupalissa */}
           {/* Drupal: Flatpickr range mode + HDS CSS */}
-          <div className="drp-calendar">
-            <DayPicker
-              mode="range"
-              numberOfMonths={2}
-              selected={pendingRange}
-              onSelect={handleDaySelect}
-              defaultMonth={defaultMonth}
-              locale={locale}
-              fromDate={minDate}
-              toDate={maxDate}
-              weekStartsOn={1}
-              showOutsideDays={false}
-              components={{
-                IconLeft: () => <IconAngleLeft aria-hidden />,
-                IconRight: () => <IconAngleRight aria-hidden />,
-              }}
-            />
-          </div>
-
-          {/* Footer: presets + actions */}
-          <div className="drp-footer">
+          <div
+            className={[
+              'drp-calendar',
+              // overflow-end: mobiili — range jatkuu näkyvän kuukauden yli
+              isMobile && pendingRange?.from && pendingRange?.to
+                && !isAfter(pendingRange.from, endOfMonth(currentMonth))
+                && isAfter(pendingRange.to, endOfMonth(currentMonth))
+                ? 'drp-calendar--overflow-end' : '',
+              // overflow-start: mobiili — range alkoi ennen näkyvää kuukautta
+              isMobile && pendingRange?.from && pendingRange?.to
+                && isBefore(pendingRange.from, startOfMonth(currentMonth))
+                && !isBefore(pendingRange.to, startOfMonth(currentMonth))
+                ? 'drp-calendar--overflow-start' : '',
+            ].filter(Boolean).join(' ')}
+            style={{
+              '--drp-overflow-end-x': overflowEndX,
+              '--drp-overflow-start-x': overflowStartX,
+            } as React.CSSProperties}
+          >
+            {/* Pikavalinnat kalenterin yläpuolella — mobiili ja desktop */}
             {presetRanges.length > 0 && (
-              <div className="drp-presets" role="group" aria-label="Pikavalinnat">
-                {/* ✅ HDS Core: Button supplementary — iconLeft=null workaround (HDS vaatii ikonin supplementary-variantille) */}
-                {presetRanges.map((preset, i) => (
-                  <Button
-                    key={i}
-                    variant={ButtonVariant.Supplementary}
-                    size={ButtonSize.Small}
-                    onClick={() => handlePreset(preset)}
-                    iconStart={null as unknown as React.ReactNode}
-                  >
-                    {preset.label}
-                  </Button>
-                ))}
+              <div className="drp-presets drp-presets--top" role="group" aria-labelledby={`${id}-presets-label`}>
+                <p id={`${id}-presets-label`} className="drp-presets__label">
+                  {strings.presetRangesLabel}
+                </p>
+                <div className="drp-presets__buttons">
+                  {presetRanges.map((preset, i) => (
+                    <Button
+                      key={i}
+                      variant={ButtonVariant.Secondary}
+                      size={ButtonSize.Small}
+                      onClick={() => handlePreset(preset)}
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
 
+            {/* Nav-rivi: [←] [Maaliskuu–Huhtikuu 2026] [→] */}
+            <div className="drp-calendar-nav-row">
+              <button
+                type="button"
+                className="drp-nav-btn"
+                onClick={goToPrevMonth}
+                aria-label={strings.prevMonth}
+              >
+                <IconAngleLeft aria-hidden />
+              </button>
+              {/* Kombinoitu otsikko — visuaalinen, yksilölliset caption-labelit jäävät ruudunlukijoille */}
+              <div className="drp-calendar-header" aria-hidden="true">
+                {isMobile
+                  ? (() => { const s = format(currentMonth, 'LLLL yyyy', { locale }); return s.charAt(0).toUpperCase() + s.slice(1); })()
+                  : getCombinedMonthLabel(currentMonth, addMonths(currentMonth, 1), locale)}
+              </div>
+              <button
+                type="button"
+                className="drp-nav-btn"
+                onClick={goToNextMonth}
+                aria-label={strings.nextMonth}
+              >
+                <IconAngleRight aria-hidden />
+              </button>
+            </div>
+
+            {/* Valintasummary — navin alla, lähempänä kalenteria */}
+            <div className="drp-phase-label" aria-live="polite" aria-atomic="true">
+              {getPhaseLabel(pendingRange, strings.selectionLabel, strings.phaseStart)}
+            </div>
+
+            {/* Animoitu kuukausiwrapper — key pakottaa animaation uudelleenkäynnistyksen */}
+            <div
+              className={`drp-months-anim${animDir ? ` drp-months-anim--${animDir}` : ''}`}
+              key={animKey}
+            >
+              {desktopOverflows.map(({ key, style }) => (
+                <div key={key} style={style} aria-hidden="true" />
+              ))}
+              <DayPicker
+                mode="range"
+                numberOfMonths={isMobile ? 1 : 2}
+                selected={pendingRange}
+                onDayClick={handleDayClick}
+                month={currentMonth}
+                onMonthChange={handleMonthChange}
+                locale={locale}
+                fromDate={minDate}
+                toDate={maxDate}
+                weekStartsOn={1}
+                showOutsideDays={false}
+              />
+            </div>
+          </div>
+
+          {/* Footer: actions */}
+          <div className="drp-footer">
             <div className="drp-actions">
-              {/* ✅ HDS Core: Button supplementary + IconCross — sama kuin HDS DateInput "Sulje" */}
-              <Button
-                variant={ButtonVariant.Supplementary}
-                size={ButtonSize.Small}
-                iconStart={<IconCross aria-hidden />}
-                onClick={closeDialog}
-              >
-                {strings.closeButton}
-              </Button>
-              {/* ✅ HDS Core: Button secondary + IconCheck — sama kuin HDS DateInput "Valitse" */}
-              <Button
-                variant={ButtonVariant.Secondary}
-                size={ButtonSize.Small}
-                iconStart={<IconCheck aria-hidden />}
-                onClick={handleConfirm}
-                disabled={!canConfirm}
-              >
-                {strings.confirmButton}
-              </Button>
+              {/* Wrapper-divit ovat flex-lapset — order ohjaa visuaalista järjestystä.
+                  Tab-järjestys seuraa DOM-järjestystä: confirm (0) ensin, close (1) toisena.
+                  Vahvista ennen Suljea aina kun canConfirm=true. */}
+              <div className="drp-action-confirm">
+                {/* ✅ HDS Core: Button primary + IconCheck */}
+                <Button
+                  variant={ButtonVariant.Primary}
+                  size={ButtonSize.Medium}
+                  iconStart={<IconCheck aria-hidden />}
+                  onClick={handleConfirm}
+                  disabled={!canConfirm}
+                >
+                  {strings.confirmButton}
+                </Button>
+              </div>
+              <div className="drp-action-close">
+                {/* ✅ HDS Core: Button secondary + IconCross */}
+                <Button
+                  variant={ButtonVariant.Secondary}
+                  size={ButtonSize.Medium}
+                  iconStart={<IconCross aria-hidden />}
+                  onClick={closeDialog}
+                >
+                  {strings.closeButton}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
+        )}
+      </div>
+
+      {/* Error text — inputin ja helper-tekstin välissä */}
+      {errorText && (
+        <p id={errorId} className="drp-error-text" role="alert">
+          <IconErrorFill aria-hidden="true" className="drp-error-icon" />
+          {errorText}
+        </p>
+      )}
+
+      {/* Format hint — aina näkyvissä */}
+      <p id={formatHintId} className="drp-helper-text">
+        {strings.formatHint}
+      </p>
+
+      {/* Helper text */}
+      {helperText && (
+        <p id={helperId} className="drp-helper-text">
+          {helperText}
+        </p>
       )}
     </div>
   );

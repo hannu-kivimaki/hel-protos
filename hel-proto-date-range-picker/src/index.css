@@ -62,7 +62,8 @@ body {
   font-family: HelsinkiGrotesk, Arial, sans-serif;
   font-size: var(--fontsize-body-m, 16px);
   color: var(--color-black-90, #1a1a1a);
-  background-color: var(--color-black-5, #f2f2f2);
+  background-color: #fff;
+  overflow-x: hidden;
 }
 
 /* ---- Sivun runko ---- */
@@ -83,7 +84,6 @@ body {
   overflow: hidden;
 }
 
-/* Hienovarainen ruudukko-tekstuuri */
 .demo-header::before {
   content: '';
   position: absolute;
@@ -97,44 +97,17 @@ body {
 
 .demo-header__inner {
   max-width: 1024px;
-  margin: 0;
   padding: 0 var(--spacing-xl, 40px);
   position: relative;
 }
 
-.demo-header__logo-row {
+.demo-header__logo-row img {
   display: block;
-  margin-bottom: 0;
-}
-
-.demo-header__wordmark {
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.01em;
-}
-
-/* "Prototyyppi" -badge otsikon yläpuolella */
-.demo-header__badge {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 2px;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  margin-bottom: var(--spacing-xs, 12px);
+  margin-bottom: var(--spacing-m, 24px);
 }
 
 .demo-header__title {
-  margin: 0 0 var(--spacing-xs, 12px) 0;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
+  margin: 0 0 var(--spacing-s, 16px) 0;
   font-size: var(--fontsize-heading-xl, 40px);
   font-weight: 400;
   line-height: 1.1;
@@ -143,14 +116,21 @@ body {
 
 .demo-header__desc {
   margin: 0 0 var(--spacing-m, 24px) 0;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
   font-size: var(--fontsize-body-m, 16px);
   color: rgba(255, 255, 255, 0.8);
   line-height: var(--lineheight-l, 1.5);
   max-width: 560px;
 }
 
-/* Tekninen stack-palkki headerin alaosassa */
+.demo-header__desc code {
+  font-family: monospace;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
 .demo-header__stack {
   display: flex;
   gap: var(--spacing-xs, 12px);
@@ -171,7 +151,6 @@ body {
 .demo-main {
   flex: 1;
   max-width: 1024px;
-  margin: 0;
   padding: 0 var(--spacing-xl, 40px);
   width: 100%;
 }
@@ -187,26 +166,17 @@ body {
   border-bottom: 1px solid var(--color-black-20, #d9d9d9);
 }
 
+/* Estää grid-itemin levenemisen sisällön mukaan */
+.demo-section > * {
+  min-width: 0;
+}
+
 .demo-section--last {
   border-bottom: none;
 }
 
-/* Sektionumero-pill */
-.demo-section__num {
-  display: inline-block;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-coat-of-arms, #0000bf);
-  border: 1.5px solid var(--color-coat-of-arms, #0000bf);
-  border-radius: 20px;
-  padding: 1px 9px;
-  margin-bottom: var(--spacing-xs, 12px);
-}
-
 .demo-section__title {
-  margin: var(--spacing-2-xs, 4px) 0 var(--spacing-xs, 12px) 0;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
+  margin: 0 0 var(--spacing-xs, 12px) 0;
   font-size: var(--fontsize-heading-s, 20px);
   font-weight: 500;
   line-height: var(--lineheight-m, 1.2);
@@ -214,7 +184,6 @@ body {
 
 .demo-section__desc {
   margin: 0;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
   font-size: var(--fontsize-body-s, 14px);
   color: var(--color-black-70, #4d4d4d);
   line-height: var(--lineheight-l, 1.5);
@@ -230,30 +199,25 @@ body {
   white-space: nowrap;
 }
 
-/* ---- Komponenttikortti ---- */
+/* ---- Komponenttialue — ei korttia, pelkkä tila ---- */
 
 .demo-section__component {
-  background: #fff;
-  padding: var(--spacing-l, 32px);
-  border: 1px solid var(--color-black-10, #e6e6e6);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.06);
+  /* Ei taustaa, reunaa eikä varjoa */
 }
 
-/* Allekkain-näkymä kahdelle komponenttivariantille */
 .demo-section__component--split {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-l, 32px);
 }
 
-/* ---- Varianttilabeli + väriswatch ---- */
+/* ---- Varianttilabeli ---- */
 
 .demo-variant__label {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0 0 var(--spacing-xs, 12px) 0;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
   font-size: var(--fontsize-body-s, 14px);
   font-weight: 500;
   color: var(--color-black-80, #333);
@@ -276,50 +240,27 @@ body {
   background: #e6e6e6;
 }
 
-/* ---- Valittu väli -ilmoitus ---- */
-
-.demo-result {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs, 12px);
-  margin: var(--spacing-s, 16px) 0 0 0;
-  padding: var(--spacing-xs, 12px) var(--spacing-s, 16px);
-  background: var(--color-black-5, #f2f2f2);
-  border-left: 3px solid var(--color-coat-of-arms, #0000bf);
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: var(--fontsize-body-s, 14px);
-  color: var(--color-black-70, #4d4d4d);
-}
-
 /* ---- Footer ---- */
 
 .demo-footer {
-  background: #fff;
   border-top: 1px solid var(--color-black-20, #d9d9d9);
   padding: var(--spacing-l, 32px) 0;
 }
 
 .demo-footer__inner {
   max-width: 1024px;
-  margin: 0;
   padding: 0 var(--spacing-xl, 40px);
   display: flex;
   align-items: center;
   gap: var(--spacing-m, 24px);
 }
 
-.demo-footer__wordmark {
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-black-90, #1a1a1a);
-  letter-spacing: -0.01em;
+.demo-footer__inner img {
   flex-shrink: 0;
 }
 
 .demo-footer__text {
   margin: 0;
-  font-family: HelsinkiGrotesk, Arial, sans-serif;
   font-size: var(--fontsize-body-s, 14px);
   color: var(--color-black-60, #808080);
 }
@@ -332,7 +273,7 @@ body {
   }
 
   .demo-header__inner {
-    padding: 0 var(--spacing-m, 24px);
+    padding: 0 var(--spacing-s, 16px);
   }
 
   .demo-header__title {
@@ -340,25 +281,27 @@ body {
   }
 
   .demo-main {
-    padding: 0 var(--spacing-m, 24px);
+    padding: 0 var(--spacing-s, 16px);
   }
 
   .demo-section {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-m, 24px);
+    display: block;
     padding: var(--spacing-l, 32px) 0;
   }
 
-  .demo-section__component {
-    padding: var(--spacing-m, 24px);
+  .demo-section__meta {
+    margin-bottom: var(--spacing-m, 24px);
   }
 
   .demo-section__component--split {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-m, 24px);
+    gap: var(--spacing-l, 32px);
   }
 
   .demo-footer {
-    padding: var(--spacing-m, 24px);
+    padding: var(--spacing-m, 24px) 0;
+  }
+
+  .demo-footer__inner {
+    padding: 0 var(--spacing-s, 16px);
   }
 }
