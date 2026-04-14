@@ -57,7 +57,9 @@ jobs:
           mkdir -p combined-dist/hel-proto-date-range-picker
           cp -r hel-proto-date-range-picker-v1-static/. combined-dist/hel-proto-date-range-picker/
           mkdir -p combined-dist/hel-proto-date-range-picker-v2
-          cp -r hel-proto-date-range-picker/dist/. combined-dist/hel-proto-date-range-picker-v2/
+          cp -r hel-proto-date-range-picker-v2-static/. combined-dist/hel-proto-date-range-picker-v2/
+          mkdir -p combined-dist/hel-proto-date-range-picker-v3
+          cp -r hel-proto-date-range-picker/dist/. combined-dist/hel-proto-date-range-picker-v3/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { DayPicker } from 'react-day-picker';
-import type { DateRange as RdpDateRange } from 'react-day-picker';
-import { format, parse, isValid, addMonths, subMonths, startOfMonth, endOfMonth, isAfter, isBefore, getDay } from 'date-fns';
+import type { DateRange as RdpDateRange, CaptionProps } from 'react-day-picker';
+import { format, parse, isValid, addMonths, subMonths, startOfMonth } from 'date-fns';
 import { fi as fiFns, sv as svFns, enGB as enFns } from 'date-fns/locale';
 import { Button, ButtonSize, ButtonVariant, IconCalendar, IconCheck, IconCross, IconCrossCircle, IconAngleLeft, IconAngleRight, IconErrorFill } from 'hds-react';
 import 'react-day-picker/dist/style.css';
@@ -80,7 +80,7 @@ const t = {
     openAnnounceEnd: (d: string) => `Kalenteri avattu. Alkupäivä on ${d}. Valitse loppupäivä.`,
     announceStart: (d: string) => `Alkupäivä valittu: ${d}. Valitse seuraavaksi loppupäivä.`,
     announceNewStart: (d: string) => `Uusi alkupäivä: ${d}. Aiempi valinta tyhjennetty. Valitse loppupäivä.`,
-    announceEnd: (d: string) => `Loppupäivä valittu: ${d}. Paina Vahvista valinta -painiketta.`,
+    announceEnd: (d: string) => `Loppupäivä valittu: ${d}.`,
     confirmButton: 'Vahvista valinta',
     closeButton: 'Sulje vahvistamatta',
     clearButton: 'Tyhjennä valinta',
@@ -106,7 +106,7 @@ const t = {
     openAnnounceEnd: (d: string) => `Kalender öppnad. Startdatum är ${d}. Välj slutdatum.`,
     announceStart: (d: string) => `Startdatum valt: ${d}. Välj slutdatum.`,
     announceNewStart: (d: string) => `Nytt startdatum: ${d}. Föregående val rensat. Välj slutdatum.`,
-    announceEnd: (d: string) => `Slutdatum valt: ${d}. Tryck Bekräfta val för att bekräfta.`,
+    announceEnd: (d: string) => `Slutdatum valt: ${d}.`,
     confirmButton: 'Bekräfta val',
     closeButton: 'Stäng utan bekräftelse',
     clearButton: 'Rensa val',
@@ -132,7 +132,7 @@ const t = {
     openAnnounceEnd: (d: string) => `Calendar opened. Start date is ${d}. Select end date.`,
     announceStart: (d: string) => `Start date selected: ${d}. Now select end date.`,
     announceNewStart: (d: string) => `New start date: ${d}. Previous selection cleared. Select end date.`,
-    announceEnd: (d: string) => `End date selected: ${d}. Press Confirm selection to confirm.`,
+    announceEnd: (d: string) => `End date selected: ${d}.`,
     confirmButton: 'Confirm selection',
     closeButton: 'Close without confirming',
     clearButton: 'Clear selection',
@@ -186,73 +186,25 @@ export function DateRangePicker({
     () => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
   );
 
-  // Overflow-indikaattorien sarakeprosentit CSS-muuttujiksi
-  // getDay: 0=Su,1=Ma,...,6=La → weekStartsOn=1: (d+6)%7 = 0=Ma,...,6=Su
-  // Mobiili: 1 kuukausi (7 saraketta = 100%). Desktop: 2 kuukautta rinnakkain.
-  // Desktop-layout: kuukausi1 (7×40=280px) + jakaja (8+1+8=17px) + kuukausi2 (280px) = 577px
-  // Mobiili: CSS custom properties overflow-gradienteille (::before/::after pseudo-elementit)
-  const overflowEndX = useMemo(() => {
-    if (!isMobile) return undefined;
-    const col = (getDay(endOfMonth(currentMonth)) + 6) % 7;
-    return `${(((col + 1) / 7) * 100).toFixed(1)}%`;
-  }, [currentMonth, isMobile]);
-
-  const overflowStartX = useMemo(() => {
-    if (!isMobile) return undefined;
-    const col = (getDay(startOfMonth(currentMonth)) + 6) % 7;
-    return `${((col / 7) * 100).toFixed(1)}%`;
-  }, [currentMonth, isMobile]);
-
-  // Desktop: React-elementit overflow-gradienteille — eriytetty mobiilista koska 2 kuukautta rinnakkain
-  // Layout: M1 (7×40=280px) | jakaja (8+1+8=17px) | M2 (280px). Korkeus: header(40px) + N×40px.
-  const desktopOverflows = useMemo(() => {
-    if (isMobile || !pendingRange?.from || !pendingRange?.to) return [];
-    const from = pendingRange.from;
-    const to = pendingRange.to;
-    const CELL = 40;
-    const M1_W = 7 * CELL;   // 280
-    const M2_X = M1_W + 17;  // 297 (280 + padding 8 + border 1 + margin 8)
-    const M2_W = 7 * CELL;   // 280
-    const month1 = currentMonth;
-    const month2 = addMonths(currentMonth, 1);
-    const weekCount = (m: Date): number => {
-      const offset = (getDay(startOfMonth(m)) + 6) % 7;
-      const days = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
-      return Math.ceil((offset + days) / 7);
-    };
-    const dayCol = (d: Date) => (getDay(d) + 6) % 7;
-    // end-gradient: range-bg alkaen kolumnin oikeasta reunasta, häipyy oikealle
-    const endGrad = (c: number) => {
-      const pct = `${((c + 1) / 7 * 100).toFixed(1)}%`;
-      return `linear-gradient(to right, transparent ${pct}, var(--drp-range-bg, #f0f0ff) ${pct}, var(--drp-range-bg-0, rgba(240,240,255,0)) 100%)`;
-    };
-    // start-gradient: häipyy vasemmalta range-bg-väriksi kolumnin vasempaan reunaan
-    const startGrad = (c: number) => {
-      const pct = `${(c / 7 * 100).toFixed(1)}%`;
-      return `linear-gradient(to right, var(--drp-range-bg-0, rgba(240,240,255,0)) 0%, var(--drp-range-bg, #f0f0ff) ${pct}, transparent ${pct})`;
-    };
-    const base: React.CSSProperties = { position: 'absolute', height: 34, pointerEvents: 'none', zIndex: 5 };
-    const els: Array<{ key: string; style: React.CSSProperties }> = [];
-    // M1 overflow-end: range jatkuu kuukauden 1 viimeisen rivin ohi kuukauteen 2
-    if (!isAfter(from, endOfMonth(month1)) && isAfter(to, endOfMonth(month1)))
-      els.push({ key: 'end1', style: { ...base, top: weekCount(month1) * CELL + 3, left: 0, width: M1_W, background: endGrad(dayCol(endOfMonth(month1))) } });
-    // M2 overflow-start: range alkoi ennen kuukautta 2 (tuli kuukaudesta 1 tai aiemmin)
-    if (isBefore(from, startOfMonth(month2)) && !isBefore(to, startOfMonth(month2)))
-      els.push({ key: 'start2', style: { ...base, top: CELL + 3, left: M2_X, width: M2_W, background: startGrad(dayCol(startOfMonth(month2))) } });
-    // M1 overflow-start: range alkoi ennen kuukautta 1
-    if (isBefore(from, startOfMonth(month1)) && !isBefore(to, startOfMonth(month1)))
-      els.push({ key: 'start1', style: { ...base, top: CELL + 3, left: 0, width: M1_W, background: startGrad(dayCol(startOfMonth(month1))) } });
-    // M2 overflow-end: range jatkuu kuukauden 2 ohi
-    if (!isAfter(from, endOfMonth(month2)) && isAfter(to, endOfMonth(month2)))
-      els.push({ key: 'end2', style: { ...base, top: weekCount(month2) * CELL + 3, left: M2_X, width: M2_W, background: endGrad(dayCol(endOfMonth(month2))) } });
-    return els;
-  }, [currentMonth, isMobile, pendingRange]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const calendarButtonRef = useRef<HTMLButtonElement>(null);
   const startInputRef = useRef<HTMLInputElement>(null);
   const endInputRef = useRef<HTMLInputElement>(null);
+  // Sentinel: asetetaan 'prev'/'next' kun käyttäjä navigoi kuukausinavigeilla.
+  // useEffect tarkistaa tämän ja siirtää fokuksen uuden kuukauden ensimmäiseen päivään.
+  // Preset-navigointi EI aseta tätä, joten se ei varasta fokusta.
+  const navTriggerRef = useRef<'prev' | 'next' | null>(null);
+
+  // Nuolinäppäimen suunta kun kalenteria navigoidaan näppäimistöllä kuukauden yli.
+  // rdp:n controlled-mode ei palauta fokusta automaattisesti kuukaudenvaihdoksen jälkeen.
+  const keyNavRef = useRef<'forward' | 'backward' | null>(null);
+
+  // Desktop: pieni connector-pallo kuukausirajan yli menevissä valinnoissa.
+  // Sijoitetaan 17px (padding 8 + border 1 + margin 8) aukkoon kuukausien väliin.
+  // Pystyasema: 50% drp-months-anim -elementistä (CSS top:50% inline-tyylillä).
+  // Vaakaasema: kuukausien välisen aukon keskipiste ≈ 280 + 9 − 3 = 286px.
 
   const helperId = `${id}-helper`;
   const errorId = `${id}-error`;
@@ -351,6 +303,67 @@ export function DateRangePicker({
     };
   }, [isOpen, currentMonth]);
 
+  // Seuraa nuolinäppäinten suuntaa dialogissa — tunnistaa onko kuukaudenvaihdos
+  // aiheutunut nuolinäppäimestä (vs. nav-painike tai preset).
+  // Ei-nuolinäppäimet ja hiiriklikkaukset nollaavat refin.
+  useEffect(() => {
+    if (!isOpen || !dialogRef.current) return;
+    const dialog = dialogRef.current;
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') keyNavRef.current = 'forward';
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') keyNavRef.current = 'backward';
+      else keyNavRef.current = null;
+    };
+    const clearKeyNav = () => { keyNavRef.current = null; };
+    dialog.addEventListener('keydown', handleKeydown);
+    dialog.addEventListener('mousedown', clearKeyNav);
+    return () => {
+      dialog.removeEventListener('keydown', handleKeydown);
+      dialog.removeEventListener('mousedown', clearKeyNav);
+    };
+  }, [isOpen]);
+
+  // Fokus uuteen kuukauteen kuukausinavigoinnin jälkeen.
+  // navTriggerRef: nav-painike → tänään tai ensimmäinen päivä.
+  // keyNavRef: nuolinäppäin → eteenpäin=ensimmäinen, taaksepäin=viimeinen näkyvä päivä.
+  // Preset-valinnat eivät aseta kumpaa tahansa — fokus pysyy preset-napissa.
+  useEffect(() => {
+    if (!isOpen || !dialogRef.current) return;
+    const navTrigger = navTriggerRef.current;
+    const keyTrigger = keyNavRef.current;
+    if (!navTrigger && !keyTrigger) return;
+    navTriggerRef.current = null;
+    keyNavRef.current = null;
+    requestAnimationFrame(() => {
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      if (navTrigger) {
+        // Nav-painike: tänään tai ensimmäinen päivä
+        const todayBtn = dialog.querySelector<HTMLElement>(
+          '.rdp-day_today:not(.rdp-day_disabled):not(.rdp-day_outside)'
+        );
+        const firstDay = dialog.querySelector<HTMLElement>(
+          '.rdp-day:not(.rdp-day_disabled):not(.rdp-day_outside)'
+        );
+        const target = todayBtn ?? firstDay;
+        if (target) {
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+          target.focus();
+        }
+      } else {
+        // Nuolinäppäin: eteenpäin → ensimmäinen näkyvä päivä, taaksepäin → viimeinen
+        const allDays = Array.from(dialog.querySelectorAll<HTMLElement>(
+          '.rdp-day:not(.rdp-day_disabled):not(.rdp-day_outside)'
+        ));
+        const target = keyTrigger === 'forward' ? allDays[0] : allDays[allDays.length - 1];
+        if (target) {
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+          target.focus();
+        }
+      }
+    });
+  }, [isOpen, currentMonth]);
+
   // Body scroll lock — estää taustan scrollauksen kun mobiilidialogin on auki.
   // Desktopilla dialogi on dropdown, ei modaali — tausta saa scrollata normaalisti.
   // iOS Safari ignooraa overflow:hidden bodylla, joten käytetään position:fixed -tekniikkaa.
@@ -410,7 +423,7 @@ export function DateRangePicker({
       const last = focusable[focusable.length - 1];
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
-        last.focus();
+        startInputRef.current?.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
         e.preventDefault();
         first.focus();
@@ -497,12 +510,14 @@ export function DateRangePicker({
   };
 
   const goToPrevMonth = useCallback(() => {
+    navTriggerRef.current = 'prev';
     setAnimDir('back');
     setAnimKey((k) => k + 1);
     setCurrentMonth((m) => startOfMonth(subMonths(m, 1)));
   }, []);
 
   const goToNextMonth = useCallback(() => {
+    navTriggerRef.current = 'next';
     setAnimDir('forward');
     setAnimKey((k) => k + 1);
     setCurrentMonth((m) => startOfMonth(addMonths(m, 1)));
@@ -532,6 +547,21 @@ export function DateRangePicker({
   const describedBy = [formatHintId, helperText ? helperId : '', errorText ? errorId : '']
     .filter(Boolean)
     .join(' ') || undefined;
+
+  // Custom Caption-komponentti: kuukausiotsikko <h2>-elementtinä ruudunlukijalle.
+  // Visuaalisesti piilotettu (rdp-caption_label CSS), mutta SR kuulee heading-semantiikan.
+  const calendarComponents = useMemo(() => ({
+    Caption: ({ displayMonth }: CaptionProps) => (
+      <div className="rdp-caption">
+        <h2 className="rdp-caption_label">
+          {(() => {
+            const s = format(displayMonth, 'LLLL yyyy', { locale });
+            return s.charAt(0).toUpperCase() + s.slice(1);
+          })()}
+        </h2>
+      </div>
+    ),
+  }), [locale]);
 
   return (
     <div className={`drp-root drp-root--${colorScheme}`} ref={containerRef}>
@@ -658,31 +688,13 @@ export function DateRangePicker({
           {/* Calendar — react-day-picker */}
           {/* ⚠️ Custom: DayPicker (react-day-picker) — EI suoraan Drupalissa */}
           {/* Drupal: Flatpickr range mode + HDS CSS */}
-          <div
-            className={[
-              'drp-calendar',
-              // overflow-end: mobiili — range jatkuu näkyvän kuukauden yli
-              isMobile && pendingRange?.from && pendingRange?.to
-                && !isAfter(pendingRange.from, endOfMonth(currentMonth))
-                && isAfter(pendingRange.to, endOfMonth(currentMonth))
-                ? 'drp-calendar--overflow-end' : '',
-              // overflow-start: mobiili — range alkoi ennen näkyvää kuukautta
-              isMobile && pendingRange?.from && pendingRange?.to
-                && isBefore(pendingRange.from, startOfMonth(currentMonth))
-                && !isBefore(pendingRange.to, startOfMonth(currentMonth))
-                ? 'drp-calendar--overflow-start' : '',
-            ].filter(Boolean).join(' ')}
-            style={{
-              '--drp-overflow-end-x': overflowEndX,
-              '--drp-overflow-start-x': overflowStartX,
-            } as React.CSSProperties}
-          >
+          <div className={`drp-calendar${phase === 'end' ? ' drp-calendar--phase-end' : ''}`}>
             {/* Pikavalinnat kalenterin yläpuolella — mobiili ja desktop */}
             {presetRanges.length > 0 && (
               <div className="drp-presets drp-presets--top" role="group" aria-labelledby={`${id}-presets-label`}>
-                <p id={`${id}-presets-label`} className="drp-presets__label">
+                <h2 id={`${id}-presets-label`} className="drp-presets__label">
                   {strings.presetRangesLabel}
-                </p>
+                </h2>
                 <div className="drp-presets__buttons">
                   {presetRanges.map((preset, i) => (
                     <Button
@@ -725,19 +737,11 @@ export function DateRangePicker({
               </button>
             </div>
 
-            {/* Valintasummary — navin alla, lähempänä kalenteria */}
-            <div className="drp-phase-label" aria-hidden="true">
-              {getPhaseLabel(pendingRange, strings.selectionLabel, strings.phaseStart)}
-            </div>
-
             {/* Animoitu kuukausiwrapper — key pakottaa animaation uudelleenkäynnistyksen */}
             <div
               className={`drp-months-anim${animDir ? ` drp-months-anim--${animDir}` : ''}`}
               key={animKey}
             >
-              {desktopOverflows.map(({ key, style }) => (
-                <div key={key} style={style} aria-hidden="true" />
-              ))}
               <DayPicker
                 mode="range"
                 numberOfMonths={isMobile ? 1 : 2}
@@ -750,12 +754,17 @@ export function DateRangePicker({
                 toDate={maxDate}
                 weekStartsOn={1}
                 showOutsideDays={false}
+                components={calendarComponents}
               />
             </div>
           </div>
 
-          {/* Footer: actions */}
+          {/* Footer: valintasummary + actions */}
           <div className="drp-footer">
+            {/* Valittu ajankohta — Vahvista-napin yläpuolella, vasen reuna */}
+            <div className="drp-phase-label" aria-hidden="true">
+              {getPhaseLabel(pendingRange, strings.selectionLabel, strings.phaseStart)}
+            </div>
             <div className="drp-actions">
               {/* Wrapper-divit ovat flex-lapset — order ohjaa visuaalista järjestystä.
                   Tab-järjestys seuraa DOM-järjestystä: confirm (0) ensin, close (1) toisena.

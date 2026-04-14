@@ -233,11 +233,10 @@
   width: max-content;
 }
 
-/* ---- Vaiheistusteksti (kalenterin sisällä, navin alla) ---- */
+/* ---- Vaiheistusteksti (footerissa Vahvista-napin yläpuolella) ---- */
 .drp-phase-label {
-  margin-top: var(--spacing-s, 16px);
-  margin-bottom: var(--spacing-s, 16px);
-  text-align: center;
+  margin: 0;
+  text-align: left;
   font-family: HelsinkiGrotesk, Arial, sans-serif;
   font-size: var(--fontsize-body-m, 16px);
   font-weight: 400;
@@ -372,6 +371,10 @@
   to   { opacity: 1; transform: translateX(0); }
 }
 
+.drp-months-anim {
+  position: relative; /* mahdollistaa kuukausirajan connector-dotin absoluuttiasemoinnin */
+}
+
 .drp-months-anim--forward {
   animation: slideInForward 200ms ease-out both;
 }
@@ -456,12 +459,15 @@
   line-height: 0;
 }
 
-/* Päiväpainike */
+/* Päiväpainike — border-radius: 50% pysyvästi, ei koskaan muutu.
+   Estää transition-artefaktin: aiemmin border-radius siirtyi 50%→0 heti
+   kun hiiri lähti, mutta background-color vielä häivyttyi 0.1s → näkyi
+   lyhyt neliöinen välähdys nurkkiin. Pysyvä 50% poistaa tämän. */
 .drp-calendar .rdp-day {
   width: 34px;
   height: 34px;
   border: 0;
-  border-radius: 0;
+  border-radius: 50%;
   background: transparent;
   color: var(--color-black-90, #1a1a1a);
   font-family: HelsinkiGrotesk, Arial, sans-serif;
@@ -472,46 +478,63 @@
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  transition: background-color 0.1s ease;
+  transition: background-color 0.1s ease, box-shadow 0.1s ease;
   overflow: hidden;
 }
 
-.drp-calendar .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled):not(.rdp-day_range_middle) {
-  background-color: var(--color-black-10, #e6e6e6);
+/* Nollataan rdp:n oma hover-tausta — estää neliskulmaisen flash-efektin.
+   Seli (td) ja nappi saavat transparent-taustan kaikissa hover-tiloissa. */
+.drp-calendar .rdp-cell:hover,
+.drp-calendar .rdp-day:hover {
+  background: transparent;
+  background-color: transparent;
+}
+
+/* Hover: pyöreä bus-light-täyttö + 1px bus-sininen sisäreuna. */
+.drp-calendar .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled):not(.rdp-day_range_middle):not(.rdp-day_range_start):not(.rdp-day_range_end) {
+  background-color: var(--color-bus-light, #f0f0ff);
+  color: var(--color-black-90, #1a1a1a);
+  box-shadow: inset 0 0 0 1px var(--drp-dot-bg, var(--color-bus, #0000bf));
 }
 
 .drp-calendar .rdp-day:focus,
 .drp-calendar .rdp-day:focus-visible {
   box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-coat-of-arms, #0000bf);
   outline: none;
+  border-radius: 50%;
+  background-color: var(--color-bus-light, #f0f0ff);
+  color: var(--color-black-90, #1a1a1a);
   z-index: 2;
   position: relative;
 }
 
-/* Tänään */
-.drp-calendar .rdp-day_today:not(.rdp-day_range_start):not(.rdp-day_range_end) {
+/* Tänään — bold kaikissa tiloissa */
+.drp-calendar .rdp-day_today {
   font-weight: 700;
 }
 
-.drp-calendar .rdp-day_today:not(.rdp-day_range_start):not(.rdp-day_range_end)::after {
+/* Tänään-rengas ::after:lla — saa oman border-radius: 50%, joten aina ympyrä
+   riippumatta napin omasta border-radiuksesta (middle: 0, end: vaihtelee).
+   Kattaa: ei-valittu, middle, same-day. Ei koske start-only/end-only
+   (niissä ::after on varattu kolmiolle → rengas tulee ::before-kerroksesta). */
+.drp-calendar .rdp-day_today:not(.rdp-day_range_start):not(.rdp-day_range_end)::after,
+.drp-calendar .rdp-day_today.rdp-day_range_start.rdp-day_range_end::after {
   content: '';
   position: absolute;
-  bottom: 3px;
-  left: 6px;
-  right: 6px;
-  height: 2px;
-  background: var(--color-black-90, #1a1a1a);
+  inset: 6px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  pointer-events: none;
 }
 
-.drp-calendar .rdp-day_today.rdp-day_range_start::after,
-.drp-calendar .rdp-day_today.rdp-day_range_end::after {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 6px;
-  right: 6px;
-  height: 2px;
-  background: #fff;
+/* Start-only / end-only tänään: ::after on varattu kolmiolle → rengas box-shadow:lla
+   ::before-ympyrän päälle. Kaksikerroksinen: base-väri peittää ulkoreunan 6px,
+   valkoinen rengas kuultaa vain 6–7.5px alueella. */
+.drp-calendar .rdp-day_today.rdp-day_range_start:not(.rdp-day_range_end)::before,
+.drp-calendar .rdp-day_today.rdp-day_range_end:not(.rdp-day_range_start)::before {
+  box-shadow:
+    inset 0 0 0 6px var(--drp-dot-bg, var(--color-bus, #0000bf)),
+    inset 0 0 0 7.5px rgba(255, 255, 255, 0.75);
 }
 
 /* Poissa kuukaudelta */
@@ -529,63 +552,260 @@
 
 /* ---- Range-tyylit ---- */
 
-/* Kaksoisluokka varmistaa oikean spesifisyyden — valkoinen teksti sinisellä/mustalla */
+/* Alku- ja loppupäivä: täytetty ympyrä ::before -elementtinä, valkoinen teksti.
+   z-index: 1 nostaa napin connector-viivan (z-index: 0) yläpuolelle.
+   border-radius: 50% buttonilla varmistaa ympyrämuotoisen focus-renkaan. */
 .drp-calendar .rdp-day.rdp-day_range_start,
 .drp-calendar .rdp-day.rdp-day_range_end {
-  background-color: var(--color-bus, #0000bf);
+  background-color: transparent;
   color: #fff;
   font-weight: 700;
-  border-radius: 0;
+  border-radius: 50%;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  overflow: visible;
 }
 
+/* Täysikokoinen (34px) täytetty ympyrä ::before:na */
+.drp-calendar .rdp-day.rdp-day_range_start::before,
+.drp-calendar .rdp-day.rdp-day_range_end::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--drp-dot-bg, var(--color-bus, #0000bf));
+  z-index: -1;
+}
+
+/* Fokus start/end: box-shadow nollataan napilta — rengas piirretään ::before:lle
+   (kuten middle-päivillä), jolloin rengas seuraa varmasti ympyrän muotoa.
+   overflow: visible sallii ::before box-shadow:n näkyä napin ulkopuolelle. */
+.drp-calendar .rdp-day.rdp-day_range_start:focus,
+.drp-calendar .rdp-day.rdp-day_range_start:focus-visible,
+.drp-calendar .rdp-day.rdp-day_range_end:focus,
+.drp-calendar .rdp-day.rdp-day_range_end:focus-visible {
+  background-color: transparent;
+  color: #fff;
+  overflow: visible;
+  box-shadow: none;
+  outline: none;
+}
+
+/* Ympyränmuotoinen fokusrengas ::before-pseudo-elementille (kaikki start/end-tilat).
+   overflow: visible napilla sallii ::before box-shadow:n näkyä napin ulkopuolelle. */
+.drp-calendar .rdp-day.rdp-day_range_start:focus::before,
+.drp-calendar .rdp-day.rdp-day_range_start:focus-visible::before,
+.drp-calendar .rdp-day.rdp-day_range_end:focus::before,
+.drp-calendar .rdp-day.rdp-day_range_end:focus-visible::before {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-coat-of-arms, #0000bf);
+}
+
+/* Today-rengas säilyy focus-tilassa start/end-päivänä — yhdistää focus-renkaan + today-renkaan */
+.drp-calendar .rdp-day_today.rdp-day_range_start:not(.rdp-day_range_end):focus::before,
+.drp-calendar .rdp-day_today.rdp-day_range_start:not(.rdp-day_range_end):focus-visible::before,
+.drp-calendar .rdp-day_today.rdp-day_range_end:not(.rdp-day_range_start):focus::before,
+.drp-calendar .rdp-day_today.rdp-day_range_end:not(.rdp-day_range_start):focus-visible::before {
+  box-shadow:
+    0 0 0 2px #fff, 0 0 0 5px var(--color-coat-of-arms, #0000bf),
+    inset 0 0 0 6px var(--drp-dot-bg, var(--color-bus, #0000bf)),
+    inset 0 0 0 7.5px rgba(255, 255, 255, 0.75);
+}
+
+
+/* Start/end hover: pimenee + valkoinen sisäreuna — peilikuva ei-valitun hoverista
+   (sinisellä pohjalla valkoinen 2px reuna = sama visuaalinen idea kuin
+   bus-lightilla sininen 1px reuna). */
 .drp-calendar .rdp-day.rdp-day_range_start:hover,
 .drp-calendar .rdp-day.rdp-day_range_end:hover {
-  background-color: var(--color-bus, #0000bf);
+  background-color: transparent;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.drp-calendar .rdp-day.rdp-day_range_start:hover::before,
+.drp-calendar .rdp-day.rdp-day_range_end:hover::before {
+  filter: brightness(0.85);
 }
 
 .drp-calendar .rdp-day.rdp-day_range_start.rdp-day_range_end {
-  background-color: var(--color-bus, #0000bf);
+  background-color: transparent;
 }
 
-/* Välin keskipäivät */
-.drp-calendar .rdp-cell:has(.rdp-day_range_middle) {
-  background-image: linear-gradient(
-    var(--drp-range-bg, var(--color-bus-light, #f0f0ff)),
-    var(--drp-range-bg, var(--color-bus-light, #f0f0ff))
-  );
-  background-size: 100% 34px;
-  background-position: center center;
-  background-repeat: no-repeat;
+/* Sama päivä alku- ja loppupäivänä — cell ei saa band- tai overflow-taustaväriä */
+.drp-calendar .rdp-cell:has(.rdp-day_range_start.rdp-day_range_end) {
+  background-image: none;
 }
 
-.drp-calendar .rdp-cell:has(.rdp-day_range_start):not(:has(.rdp-day_range_end)) {
-  background-image: linear-gradient(
-    var(--drp-range-bg, var(--color-bus-light, #f0f0ff)),
-    var(--drp-range-bg, var(--color-bus-light, #f0f0ff))
-  );
-  background-size: 50% 34px;
-  background-position: right center;
-  background-repeat: no-repeat;
+/* Kolmio-indikaattorit: start-päivällä ► vasemmalla, end-päivällä ◄ oikealla.
+   Toteutus ::after -elementtinä buttonilla. Same-day: vasen kolmio buttonin ::after,
+   oikea kolmio cellin ::after (cellin pseudo-elementit vapaina same-day-solussa). */
+
+/* Start-päivä (ei same-day): ► vasemmalla, kärki kiinni ympyrän vasemmassa reunassa.
+   Buttonin ::after, right: 100% asettaa kärjen napin vasempaan reunaan = ympyrän vasen reuna. */
+.drp-calendar .rdp-day.rdp-day_range_start:not(.rdp-day_range_end)::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid var(--drp-dot-bg, var(--color-bus, #0000bf));
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
 }
 
-.drp-calendar .rdp-cell:has(.rdp-day_range_end):not(:has(.rdp-day_range_start)) {
-  background-image: linear-gradient(
-    var(--drp-range-bg, var(--color-bus-light, #f0f0ff)),
-    var(--drp-range-bg, var(--color-bus-light, #f0f0ff))
-  );
-  background-size: 50% 34px;
-  background-position: left center;
-  background-repeat: no-repeat;
+/* End-päivä (ei same-day): ◄ oikealla, kärki kiinni ympyrän oikeassa reunassa. */
+.drp-calendar .rdp-day.rdp-day_range_end:not(.rdp-day_range_start)::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 7px solid var(--drp-dot-bg, var(--color-bus, #0000bf));
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
 }
 
+/* Alkupäivävaihe (phase='end'): oikea kolmio piilotetaan same-day-solusta —
+   oikea kolmio tulee näkyviin vasta kun käyttäjä vahvistaa saman päivän loppupäiväksi. */
+.drp-calendar--phase-end .rdp-cell:has(.rdp-day_range_start.rdp-day_range_end)::after {
+  display: none;
+}
+
+/* Same-day: molemmat kolmiot cellin pseudo-elementteinä — ei riipu buttonin containing blockista.
+   Nappi on aina solun KESKELLÄ (rdp: text-align: center), joten calc(50% ± 17px) toimii
+   kaikilla soluleveyksillä (40px desktop, auto-leveys mobiilissa).
+   17px = napin säde (34px / 2). 7px = kolmion leveys.
+   Vasen ►: kärki (oikealla) solun centeristä -17px → right: calc(50% + 17px) ✓
+   Oikea ◄: kärki (vasemmalla) solun centeristä +17px → left: calc(50% + 17px) ✓ */
+.drp-calendar .rdp-cell:has(.rdp-day_range_start.rdp-day_range_end)::before {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 10px;
+  background: var(--drp-dot-bg, var(--color-bus, #0000bf));
+  clip-path: polygon(100% 50%, 0% 0%, 0% 100%);
+  right: calc(50% + 17px);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.drp-calendar .rdp-cell:has(.rdp-day_range_start.rdp-day_range_end)::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 10px;
+  background: var(--drp-dot-bg, var(--color-bus, #0000bf));
+  clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+  left: calc(50% + 17px);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ============================================================
+   Range-viivat — ympyröitä yhdistävä 3px vaakaviiva
+   Start-solu: viiva oikealle (50% → 100%). End-solu: viiva vasemmalle (0 → 50%).
+   Middle-solut: koko leveys (0 → 100%). Same-day: ei viivaa.
+   Viivat ovat cell (td) ::before / ::after -pseudo-elementteinä —
+   ei ristiriitaa button ::before -ympyrän kanssa (eri elementit).
+   ============================================================ */
+
+/* Oikea puoli: start-solusta (ei ykspäiväinen) */
+.drp-calendar .rdp-cell:has(.rdp-day_range_start):not(:has(.rdp-day_range_end))::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: var(--drp-dot-bg, var(--color-bus, #0000bf));
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Koko leveys: middle-solut */
+.drp-calendar .rdp-cell:has(.rdp-day_range_middle)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: var(--drp-dot-bg, var(--color-bus, #0000bf));
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Vasen puoli: end-solusta (ei ykspäiväinen) */
+.drp-calendar .rdp-cell:has(.rdp-day_range_end):not(:has(.rdp-day_range_start))::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: var(--drp-dot-bg, var(--color-bus, #0000bf));
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Välimatkapäivät näytetään palloina — ei band-taustaväriä soluissa */
+
+/* Välimatkapäivät: outline-ympyrä (24px), valkoinen täyttö, sininen teksti.
+   z-index: 1 nostaa napin connector-viivan yläpuolelle. */
 .drp-calendar .rdp-day_range_middle {
   background: transparent;
-  color: var(--color-black-90, #1a1a1a);
+  color: var(--drp-dot-bg, var(--color-bus, #0000bf));
+  font-weight: 500;
   border-radius: 0;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
 }
 
-.drp-calendar .rdp-day_range_middle:hover {
-  background-color: rgba(0, 0, 191, 0.12);
+.drp-calendar .rdp-day_range_middle::before {
+  content: '';
+  position: absolute;
+  inset: 3px; /* 34px - 3px*2 = 28px ympyrä */
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--drp-dot-bg, var(--color-bus, #0000bf));
+  z-index: -1;
+}
+
+/* Middle hover: täyttö vaihtuu white → bus-light — sama kuin ei-valitun hover-täyttö.
+   Border pysyy bus-sinisenä, täyttö lämpenee bus-lightiin. */
+.drp-calendar .rdp-day_range_middle:hover::before {
+  background: var(--color-bus-light, #f0f0ff);
+}
+
+/* Focus-rengas: seuraa 28px-palloa, ei 34px-nappia.
+   overflow: visible sallii ::before -elementin box-shadow:n näkyä napin ulkopuolelle.
+   Napin oma box-shadow nollataan — rengas piirtyy ::before:n kautta. */
+.drp-calendar .rdp-day_range_middle:focus,
+.drp-calendar .rdp-day_range_middle:focus-visible {
+  box-shadow: none;
+  overflow: visible;
+  background: transparent;
+}
+
+.drp-calendar .rdp-day_range_middle:focus::before,
+.drp-calendar .rdp-day_range_middle:focus-visible::before {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-coat-of-arms, #0000bf);
 }
 
 /* ============================================================
@@ -595,11 +815,13 @@
 .drp-dialog--bus {
   --drp-range-bg: var(--color-bus-light, #f0f0ff);
   --drp-range-bg-0: rgba(240, 240, 255, 0); /* bus-light alpha=0 — gradient-häipymistä varten */
+  --drp-dot-bg: var(--color-bus, #0000bf); /* välimatkapäivien pallon väri */
 }
 
 .drp-dialog--black {
   --drp-range-bg: var(--color-black-10, #e6e6e6);
   --drp-range-bg-0: rgba(230, 230, 230, 0); /* black-10 alpha=0 — gradient-häipymistä varten */
+  --drp-dot-bg: var(--color-black-90, #1a1a1a); /* välimatkapäivien pallon väri */
 }
 
 .drp-root--black .drp-input-group:focus-within:not(.drp-input-group--invalid):not(:has(.drp-calendar-btn:focus-visible)) {
@@ -633,31 +855,58 @@
   box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-black-90, #1a1a1a);
 }
 
-/* Black-teema: rdp:n oma accent-väri (sininen) ylikirjoitetaan — estää sinisävyisen
-   taustan kun fokus on valitsemattomalla päivällä (mm. tänään-solu). */
+/* Black-teema: pyöreä black-10-täyttö, musta teksti */
 .drp-root--black .drp-calendar .rdp-day:focus:not(.rdp-day_range_start):not(.rdp-day_range_end),
 .drp-root--black .drp-calendar .rdp-day:focus-visible:not(.rdp-day_range_start):not(.rdp-day_range_end) {
   background-color: var(--color-black-10, #e6e6e6) !important;
+  color: var(--color-black-90, #1a1a1a);
 }
 
-/* Black-teema: valitut päivät mustalla */
+/* Black-teema: täytetty musta ympyrä, valkoinen teksti */
 .drp-root--black .drp-calendar .rdp-day.rdp-day_range_start,
 .drp-root--black .drp-calendar .rdp-day.rdp-day_range_end {
-  background-color: var(--color-black-90, #1a1a1a);
+  background-color: transparent;
   color: #fff;
 }
 
 .drp-root--black .drp-calendar .rdp-day.rdp-day_range_start:hover,
 .drp-root--black .drp-calendar .rdp-day.rdp-day_range_end:hover {
-  background-color: var(--color-black-90, #1a1a1a);
+  background-color: transparent;
 }
 
 .drp-root--black .drp-calendar .rdp-day.rdp-day_range_start.rdp-day_range_end {
-  background-color: var(--color-black-90, #1a1a1a);
+  background-color: transparent;
 }
 
-.drp-root--black .drp-calendar .rdp-day_range_middle:hover {
-  background-color: rgba(0, 0, 0, 0.12);
+/* Black-teema middle hover: täyttö vaihtuu white → black-10 (pari-black-lightille) */
+.drp-root--black .drp-calendar .rdp-day_range_middle:hover::before {
+  background: var(--color-black-10, #e6e6e6);
+}
+
+/* Black-teema: focus-rengas start/end-päivillä — box-shadow napilta pois, ::before:lle */
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_start:focus,
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_start:focus-visible,
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_end:focus,
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_end:focus-visible {
+  box-shadow: none;
+}
+
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_start:focus::before,
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_start:focus-visible::before,
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_end:focus::before,
+.drp-root--black .drp-calendar .rdp-day.rdp-day_range_end:focus-visible::before {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-black-90, #1a1a1a);
+}
+
+/* Black-teema: focus-rengas middle-ympyrällä */
+.drp-root--black .drp-calendar .rdp-day_range_middle:focus,
+.drp-root--black .drp-calendar .rdp-day_range_middle:focus-visible {
+  background-color: transparent !important;
+}
+
+.drp-root--black .drp-calendar .rdp-day_range_middle:focus::before,
+.drp-root--black .drp-calendar .rdp-day_range_middle:focus-visible::before {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-black-90, #1a1a1a);
 }
 
 /* Black-teema: HDS Button CSS-muuttujat
@@ -688,55 +937,6 @@
   --color-focus: #000;
 }
 
-/* ============================================================
-   Range overflow -indikaattorit (mobiili, 1 kuukausi kerrallaan)
-   Gradient täsmää range-palkin korkeuteen (34px) ja pystyasemointiin (3px padding).
-   Suunta: vahva range-väri vasemmalla → häipyy oikealle, jatkumisen vaikutelma.
-   ============================================================ */
-
-.drp-months-anim {
-  position: relative;
-}
-
-/* Range jatkuu seuraavaan kuukauteen:
-   Hard-step range-bg-väri viimeisen valitun päivän kohdalla → häipyy valkoiseen.
-   --drp-range-bg-0 = sama väri alpha=0, jotta häipyminen pysyy oikeassa sävyssä. */
-.drp-calendar--overflow-end .drp-months-anim::after {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 0;
-  right: 0;
-  height: 34px;
-  background: linear-gradient(
-    to right,
-    transparent var(--drp-overflow-end-x, 28%),
-    var(--drp-range-bg, #f0f0ff) var(--drp-overflow-end-x, 28%),
-    var(--drp-range-bg-0, rgba(240, 240, 255, 0)) 100%
-  );
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* Range alkoi edellisessä kuussa:
-   Häipyy valkoisesta range-bg-väriksi ensimmäisen päivän kohdalla — peilikuva overflow-endistä.
-   Tyhjät solut vasemmalla saavat kasvavan range-värin kohti ensimmäistä valittua päivää. */
-.drp-calendar--overflow-start .drp-months-anim::before {
-  content: '';
-  position: absolute;
-  top: calc(var(--rdp-cell-size, 44px) + 3px);
-  left: 0;
-  right: 0;
-  height: 34px;
-  background: linear-gradient(
-    to right,
-    var(--drp-range-bg-0, rgba(240, 240, 255, 0)) 0%,
-    var(--drp-range-bg, #f0f0ff) var(--drp-overflow-start-x, 28%),
-    transparent var(--drp-overflow-start-x, 28%)
-  );
-  pointer-events: none;
-  z-index: 5;
-}
 
 /* ============================================================
    Mobiili

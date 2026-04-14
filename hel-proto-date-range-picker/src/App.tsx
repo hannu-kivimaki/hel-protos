@@ -22,21 +22,21 @@ const futurePresets: PresetRange[] = [
     getRange: () => ({ startDate: startOfDay(new Date()), endDate: endOfDay(new Date()) }),
   },
   {
-    label: 'Tällä viikolla',
+    label: 'Tämä viikko',
     getRange: () => ({
       startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
       endDate: endOfWeek(new Date(), { weekStartsOn: 1 }),
     }),
   },
   {
-    label: 'Ensi viikolla',
+    label: 'Ensi viikko',
     getRange: () => ({
       startDate: startOfWeek(addWeeks(new Date(), 1), { weekStartsOn: 1 }),
       endDate: endOfWeek(addWeeks(new Date(), 1), { weekStartsOn: 1 }),
     }),
   },
   {
-    label: 'Tänä viikonloppuna',
+    label: 'Tuleva viikonloppu',
     getRange: () => {
       const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
       const saturday = new Date(weekEnd);
